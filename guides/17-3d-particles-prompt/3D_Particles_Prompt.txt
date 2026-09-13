@@ -1,0 +1,124 @@
+<prompt>
+  <role>
+    You are a senior creative-coding engineer with deep expertise in WebGL, Three.js, real-time computer vision (MediaPipe), and modern UI/UX design. You write production-grade, self-contained, dependency-light front-end code that runs in a single HTML file. You care about visual polish, smooth animation, mathematical correctness of generative geometry, and graceful degradation when hardware permissions (e.g. webcam) are denied.
+  </role>
+
+  <context>
+    The user wants to recreate an interactive 3D particle playground that runs entirely in the browser from a single `index.html` file. The experience uses the device webcam + MediaPipe Hands to track the user's hand, and uses hand openness ("tension") to drive a Three.js particle system that morphs between several mathematical shape templates. There is no build step, no bundler, no framework — just one HTML file with inline `<style>` and `<script type="module">` blocks, using ES module import maps for Three.js and CDN globals for MediaPipe.
+  </context>
+
+  <task>
+    Create a single, self-contained file named `index.html` that implements an interactive 3D particle visualization called "AntiGravity Particles". The particles morph between predefined shape templates, respond in real time to webcam-tracked hand gestures, and are controlled via an on-screen glassmorphism UI. Output ONLY the file — no explanation, no commentary, no extra files.
+  </task>
+
+  <steps>
+    1. **Scaffold the HTML.** One `index.html`. Include `<meta>` viewport tag. Load the `Outfit` Google Font (weights 300/400/600/800). Inline all CSS in a `<style>` block. Inline all JS in a `<script type="module">` block at the end of `<body>`.
+
+    2. **Set up dependencies via import map + CDN globals.**
+       - Add an `<script type="importmap">` mapping `"three"` → `https://unpkg.com/three@0.160.0/build/three.module.js` and `"three/addons/"` → `https://unpkg.com/three@0.160.0/examples/jsm/`.
+       - Load MediaPipe globals from `https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js`, `.../control_utils/control_utils.js`, and `.../hands/hands.js` (with `crossorigin="anonymous"`).
+
+    3. **Build the DOM.** Create:
+       - `<div id="canvas-container">` (full-viewport, z-index 1) — Three.js mounts here.
+       - `<video id="video-feed" playsinline>` — mirrored, ~160×120px, bottom-left, z-index 3.
+       - `<div id="ui-layer">` containing two glass `.panel` elements:
+         - **Top-left panel:** `<h1>` title "AntiGravity Particles", short instruction text ("Show your hand to interact." / "Pinch/Close hand to affect particles."), a `<label> Particle Color </label>` + `<input type="color" id="color-picker" value="#ff007f">`, and a `<div class="status" id="status-msg">Initializing Camera...</div>`.
+         - **Top-right panel:** `<label> Templates </label>` + seven `<button class="template-btn" data-type="...">` entries with the labels and `data-type` values: `sphere` ("Sphere (Reset)", initially `.active`), `heart` ("Heart"), `flower` ("Flower"), `saturn` ("Saturn"), `buddha` ("Buddha"), `fireworks` ("Fireworks"), `muhu` ("High Five → Heart").
+
+    4. **Style the UI (glassmorphism, dark theme).**
+       - `body`: zero margin, `overflow: hidden`, radial-gradient background from `#16162a` at center to `#050505` at edges, `font-family: 'Outfit', sans-serif`, white text.
+       - `.panel`: `background: rgba(15,15,20,0.45)`, `backdrop-filter: blur(25px)` (with `-webkit-` prefix), 16px radius, 1px translucent white border, soft drop shadow, 20px padding, flex column with 12px gap, max-width 280px, absolutely positioned 24px from edges.
+       - `h1`: 1.4rem, weight 800, animated gradient text using `linear-gradient(135deg, #ff007f, #7f00ff, #00d2ff)` clipped to text with a continuous `shine` keyframe animation (4s linear infinite, shifting `background-position`).
+       - `label`: uppercase, letter-spaced, weight 600, light gray.
+       - `button`: translucent dark background, white text, right-aligned, full-width, 8px radius, font-family inherited; on `:hover` lighten background, slightly translate left (`translateX(-4px)`), and add shadow; on `.active` apply the same pink→purple gradient as the title with a glowing shadow.
+       - `input[type="color"]`: 100% width, 40px tall, no border on the wrapper, with `::-webkit-color-swatch` styled with a 2px translucent white border and 8px radius.
+       - `#video-feed`: `transform: scaleX(-1)` (mirror), 0.8 opacity, 2px translucent border, 8px radius, `object-fit: cover`.
+       - `.status`: small, centered, dark translucent pill; `.status.active` turns neon green (`#00ff66`) with a soft text-shadow glow; `.status.error` turns neon red (`#ff003c`) with matching glow.
+
+    5. **Initialize Three.js.**
+       - Constants: `PARTICLE_COUNT = 10000`, `PARTICLE_SIZE = 0.15`.
+       - `THREE.Scene` with `FogExp2(0x000000, 0.02)` for depth.
+       - `PerspectiveCamera(60, aspect, 0.1, 1000)` at `z = 50`.
+       - `WebGLRenderer({ antialias: true, alpha: true })`, sized to viewport, `setPixelRatio(devicePixelRatio)`.
+       - `OrbitControls` with `enableDamping = true`, `dampingFactor = 0.05`, `autoRotate = true`, `autoRotateSpeed = 0.5`.
+       - One `THREE.BufferGeometry` with a `position` attribute (Float32Array of length `PARTICLE_COUNT * 3`) initialized to random values in `[-50, 50]`.
+       - One `THREE.PointsMaterial` with `color: 0xff007f`, `size: PARTICLE_SIZE`, `map` loaded from `https://threejs.org/examples/textures/sprites/disc.png`, `transparent: true`, `opacity: 0.95`, `blending: THREE.AdditiveBlending`, `depthWrite: false`.
+       - Wrap geometry+material in a `THREE.Points` and add to the scene. Add a soft `AmbientLight(0xffffff, 0.2)`.
+       - Handle window resize (update camera aspect + renderer size).
+
+    6. **Implement the seven shape templates.** Each is a function `fillX(buffer)` that writes target xyz triples into a Float32Array of length `PARTICLE_COUNT * 3`. Use these formulas exactly:
+       - **Sphere:** Fibonacci-like distribution: `phi = acos(-1 + 2i/N)`, `theta = sqrt(N·π)·phi`, radius `r = 10`, then standard spherical → Cartesian.
+       - **Heart:** classic 2D heart curve `x = 16·sin³(t)`, `y = 13·cos(t) − 5·cos(2t) − 2·cos(3t) − cos(4t)` for `t ∈ [0, 2π)`, scaled by 0.5 and a random `s = sqrt(rand())` for interior fill, with `z = (rand − 0.5)·6·s` for thickness.
+       - **Flower:** rose curve, `k = 4` petals: `r = 10·|cos(k·θ)| + 2`, `z = (rand − 0.5)·5·|cos(k·θ)|` (thicker at petal tips).
+       - **Saturn:** 70% of points form a sphere body of radius 6 (Fibonacci distribution); the remaining 30% form a thin flat ring (radius 9–16, y-thickness 0.5) tilted 20° around the X axis.
+       - **Buddha:** stacked solid spheres approximating a seated figure: head (center `(0, 6, 0)`, r=2.5, ~15% of points), torso (`(0, 2, 0)`, r=4.0, ~45%), two leg/base spheres at `(±3, −3, 1)`, r=2.8, ~20% each. Use `r = radius·∛(rand())` for uniform solid distribution.
+       - **Fireworks:** uniform radial burst — random direction on the unit sphere (`theta = rand·2π`, `phi = acos(2·rand − 1)`), random length `len = rand·15`.
+       - **MUHU text:** off-screen 2D canvas (200×100), draw black background, then `bold 60px Arial` white "MUHU" centered. Sample every 2nd pixel; where `red > 128`, push a 3D point with `x = (px − 100)·0.25`, `y = (50 − py)·0.25`, `z = 0`. Cache the result. When filling the buffer, loop indices over the cached point list (wrap with modulo + slight random offset for overflow particles). The label promises "High Five → Heart": when the user closes their fist while this template is active, particles should morph to the heart shape (precompute a separate `heartBuffer` once at startup for this).
+
+    7. **Hand tracking via MediaPipe.**
+       - Construct `new Hands({ locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/hands/' + f })`.
+       - `setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 })`.
+       - Use `new Camera(videoElement, { onFrame: () => hands.send({ image: videoElement }), width: 640, height: 480 })` and `.start()`.
+       - On `.start()` success, set status to "Camera Active. Tracking Hands..." with `.active` class. On failure, set "Camera Error! Check permissions." with `.error` class — the app must keep running with idle/auto animation.
+       - In `onResults`, if landmarks exist:
+         - Use the first hand. Compute average Euclidean distance from wrist (landmark 0) to fingertips (8, 12, 16, 20).
+         - Normalize: `handTension = clamp((avgDist − 0.15) · 3, 0, 1)`.
+         - `handClosed = handTension < 0.2`. Set `handDetected = true`.
+       - If no hand: `handDetected = false`, `handTension = 0.5`, `handClosed = false`.
+
+    8. **Render loop (`requestAnimationFrame`).**
+       - Maintain a `targetPositions` Float32Array. `setTemplate(type)` writes new targets into it (do NOT snap current positions — let the loop interpolate).
+       - Each frame, lerp current positions toward `targetPositions` with `speed = 0.05 + handTension·0.02`.
+       - Special case: if `currentTemplate === 'muhu' && handClosed`, lerp toward the precomputed `heartBuffer` instead.
+       - Map hand tension to scale: `targetScale = 0.5 + handTension·1.5`, then lerp `particles.scale` toward it (factor 0.1). Open hand = expanded, fist = compressed.
+       - When `!handDetected`, add gentle idle noise: `+= sin(time + i)·0.02` on x, `+= cos(time + i·0.5)·0.02` on y.
+       - When `currentTemplate === 'fireworks'` and a hand IS detected, add per-frame jitter `(rand − 0.5)·0.2` on all three axes for a sparking effect.
+       - Mark `geometry.attributes.position.needsUpdate = true`. Update `OrbitControls`. Render.
+
+    9. **Wire the UI.**
+       - Color picker `input` event → `materials.color.set(value)`.
+       - Template buttons `click` → toggle `.active` class on the clicked button only, then call `setTemplate(btn.dataset.type)`.
+
+    10. **Boot order.** `initThree()` → `initUI()` → `animate()` → `setTimeout(setupMediaPipe, 1000)` (slight defer so the UI paints before the camera permission prompt).
+  </steps>
+
+  <constraints>
+    - **Single file only.** Everything (HTML, CSS, JS) lives in one `index.html`. No external CSS, JS, or asset files beyond the CDN URLs specified.
+    - **No build tooling.** Code must run by simply opening the file via a local web server (e.g. `python3 -m http.server`). Do not use TypeScript, JSX, npm scripts, bundlers, or frameworks (no React, Vue, Svelte).
+    - **Use ES modules via the import map** for Three.js. Use the global-script pattern for MediaPipe (it does not ship clean ESM).
+    - **Pin Three.js to 0.160.0** for API compatibility with the geometry/material APIs used here.
+    - **Do not** rely on `THREE.CapsuleGeometry` or any geometry introduced after r142.
+    - **Particle count is exactly 10,000.** Do not change without reason.
+    - **Graceful degradation:** if camera access fails, the visualization keeps animating with idle noise — never throw and never freeze.
+    - **No localStorage / sessionStorage / IndexedDB.** All state lives in module-scoped variables.
+    - **Math correctness matters.** The heart, rose, and Fibonacci sphere formulas must be implemented as specified — do not substitute a generic sphere for everything.
+    - **Performance:** mutate the existing `Float32Array` in place each frame; do not allocate new arrays inside the render loop.
+    - **Do NOT add extra features** not listed (no audio, no GUI library like dat.GUI/lil-gui, no postprocessing passes, no extra templates).
+  </constraints>
+
+  <tone_style>
+    Code should read like a confident, well-organized creative-coding sketch: clear section comments (`// --- Setup Three.js ---`, `// --- Template Generators ---`, `// --- Render Loop ---`), descriptive variable names, no dead code, no console noise beyond a single `console.error` in the camera failure path. Prefer small pure functions for the shape generators. Visually the result should feel like a high-end product demo, not a tutorial — dark, glowing, neon-gradient, smooth.
+  </tone_style>
+
+  <output_format>
+    A single fenced code block (or a single written file) containing the full contents of `index.html`. No prose before or after. No partial snippets. The file must be runnable as-is.
+  </output_format>
+
+  <self_evaluation>
+    Before delivering, silently verify each of the following. If any fails, fix it and re-verify:
+    1. Opening the file in Chrome/Edge over a local HTTP server prompts for camera, then animates 10,000 glowing particles in a sphere.
+    2. Clicking each of the seven template buttons morphs particles smoothly (not instantaneously) into the correct shape, and the clicked button gets the gradient `.active` style while others lose it.
+    3. Opening the hand wide expands the particle cloud; making a fist contracts it. The transition is smooth, not jittery.
+    4. With the "High Five → Heart" template active, a closed fist morphs the "MUHU" word into a heart and an open hand returns it to "MUHU".
+    5. Denying camera permission still results in a gently animating particle cloud and an error-styled status pill — no white screen, no uncaught exception.
+    6. The color picker live-updates particle color.
+    7. Window resize keeps the canvas full-bleed without distortion.
+    8. No `THREE.*Geometry` introduced after r142 is used; no `localStorage`/`sessionStorage` calls exist; no external files beyond the listed CDNs are referenced.
+    9. The title `<h1>` shows a continuously shimmering pink→purple→cyan gradient.
+    10. The webcam preview appears mirrored in the bottom-left corner.
+  </self_evaluation>
+
+  <success_criteria>
+    A 10/10 result is a single `index.html` that, on first load, looks like a polished WebGL product demo: a dark cosmic background, a luminous glassmorphism UI, a shimmering gradient title, and a cloud of 10,000 additive-blended particles that breathe with the user's hand. Every shape template is mathematically correct and visually distinct. Hand tracking feels responsive, not laggy. The MUHU → heart morph reads as magical. The code is clean, sectioned, and immediately legible to another engineer. Nothing extra, nothing missing.
+  </success_criteria>
+</prompt>

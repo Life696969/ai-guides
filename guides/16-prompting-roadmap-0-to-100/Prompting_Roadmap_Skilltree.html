@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompting Roadmap 0 to 100 | Skill Tree by Mudit Jain</title>
+  <meta name="description" content="A practical 0 to 100 prompting roadmap with skill tree, templates, exercises, references, and a 14-day challenge." />
+  <style>
+    :root{
+      --bg:#f7f5ef;
+      --paper:#fffdf8;
+      --ink:#151821;
+      --muted:#626773;
+      --line:#ddd7cb;
+      --soft:#efe9dc;
+      --soft2:#f5efe3;
+      --brand:#111827;
+      --accent:#fff200;
+      --accent2:#0ea5e9;
+      --green:#16a34a;
+      --orange:#f59e0b;
+      --red:#ef4444;
+      --purple:#7c3aed;
+      --shadow:0 24px 70px rgba(17,24,39,.10);
+      --radius:24px;
+      --radius2:16px;
+      --max:1180px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255,242,0,.25), transparent 30%),
+        radial-gradient(circle at top right, rgba(14,165,233,.14), transparent 28%),
+        linear-gradient(180deg, #fbfaf7 0%, var(--bg) 60%, #f4efe5 100%);
+      color:var(--ink);
+      line-height:1.55;
+    }
+    a{color:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 22px}
+    .topbar{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter: blur(18px);
+      background:rgba(247,245,239,.78);
+      border-bottom:1px solid rgba(221,215,203,.78);
+    }
+    .nav{
+      max-width:var(--max);margin:auto;padding:12px 22px;
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+    }
+    .brandmark{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:-.03em}
+    .dot{width:34px;height:34px;border-radius:12px;background:var(--ink);display:grid;place-items:center;color:var(--accent);box-shadow:0 8px 20px rgba(0,0,0,.15)}
+    .navlinks{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted);font-weight:700}
+    .navlinks a{text-decoration:none;padding:8px 10px;border-radius:999px}
+    .navlinks a:hover{background:rgba(255,242,0,.38);color:var(--ink)}
+    .progress-shell{height:6px;background:rgba(17,24,39,.06)}
+    .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--ink),var(--purple),var(--accent2));transition:width .35s ease}
+    .hero{padding:58px 0 34px}
+    .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:stretch}
+    .hero-card{
+      background:linear-gradient(145deg, #111827 0%, #1f2937 58%, #0f172a 100%);
+      color:white;border-radius:34px;padding:36px;box-shadow:var(--shadow);position:relative;overflow:hidden;min-height:420px;
+    }
+    .hero-card:before{content:"";position:absolute;inset:-80px -120px auto auto;width:310px;height:310px;border-radius:999px;background:rgba(255,242,0,.26);filter:blur(8px)}
+    .hero-card:after{content:"";position:absolute;inset:auto auto -140px -100px;width:330px;height:330px;border-radius:999px;background:rgba(14,165,233,.16);filter:blur(12px)}
+    .hero-content{position:relative;z-index:1}
+    .eyebrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+    .pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);padding:7px 10px;border-radius:999px;font-size:12px;font-weight:850;color:rgba(255,255,255,.88)}
+    .pill.dark{background:var(--ink);color:white;border-color:var(--ink)}
+    .pill.yellow{background:var(--accent);color:#111827;border-color:rgba(0,0,0,.04)}
+    h1{font-size:clamp(42px,8vw,86px);line-height:.92;letter-spacing:-.075em;margin:0 0 18px;font-weight:950;max-width:850px}
+    .subtitle{font-size:clamp(17px,2.4vw,23px);line-height:1.35;color:rgba(255,255,255,.80);max-width:720px;margin:0 0 24px}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+    .btn{appearance:none;border:0;border-radius:999px;padding:13px 18px;font-weight:900;font-size:14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:.2s ease;box-shadow:0 12px 28px rgba(0,0,0,.10)}
+    .btn.primary{background:var(--accent);color:#111827}.btn.primary:hover{transform:translateY(-2px);box-shadow:0 18px 34px rgba(255,242,0,.20)}
+    .btn.ghost{background:rgba(255,255,255,.10);color:white;border:1px solid rgba(255,255,255,.18)}.btn.ghost:hover{background:rgba(255,255,255,.16)}
+    .btn.light{background:white;color:var(--ink);border:1px solid var(--line)}.btn.light:hover{transform:translateY(-2px)}
+    .hero-side{display:grid;gap:16px}
+    .stat-card,.panel{background:rgba(255,253,248,.88);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+    .stat-card h3,.panel h3{margin:0 0 8px;font-size:18px;letter-spacing:-.02em}
+    .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:16px}
+    .metric{border-radius:18px;background:var(--soft2);padding:16px;border:1px solid rgba(221,215,203,.8)}
+    .metric strong{display:block;font-size:30px;letter-spacing:-.06em;line-height:1}.metric span{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+    .quote{font-size:18px;font-weight:900;line-height:1.25;letter-spacing:-.03em;margin-top:14px;padding:16px;border-left:5px solid var(--accent);background:#fffbe8;border-radius:14px;color:#111827}
+    section{padding:34px 0}
+    .section-title{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:18px}
+    .section-title h2{font-size:clamp(30px,5vw,48px);line-height:1;letter-spacing:-.06em;margin:0}
+    .section-title p{margin:0;color:var(--muted);font-weight:650;max-width:520px}
+    .grid{display:grid;gap:18px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:0 14px 36px rgba(17,24,39,.06)}
+    .card h3{margin:0 0 8px;font-size:22px;line-height:1.05;letter-spacing:-.04em}.card p{margin:0;color:var(--muted)}
+    .tag{display:inline-flex;padding:5px 8px;border-radius:999px;background:var(--soft);font-size:11px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#52545c;margin-bottom:10px}
+    .callout{background:#fffbe8;border:1px solid rgba(245,158,11,.35);border-left:6px solid var(--accent);border-radius:18px;padding:16px;font-weight:800;line-height:1.35}
+    .skilltree{position:relative;margin-top:18px;background:rgba(255,253,248,.85);border:1px solid var(--line);border-radius:32px;padding:30px;box-shadow:var(--shadow);overflow:hidden}
+    .skilltree:before{content:"";position:absolute;top:88px;left:9%;right:9%;height:4px;background:linear-gradient(90deg, var(--accent), var(--accent2), var(--purple));border-radius:99px;opacity:.75}
+    .nodes{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:12px;z-index:1}
+    .node{background:white;border:2px solid #e4ded2;border-radius:22px;padding:16px 12px;min-height:188px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.2s ease;box-shadow:0 12px 28px rgba(17,24,39,.06)}
+    .node:hover{transform:translateY(-4px);border-color:#c8c0b2}.node.active{border-color:var(--ink);box-shadow:0 16px 34px rgba(17,24,39,.14)}.node.done{background:#f0fff4;border-color:rgba(22,163,74,.35)}
+    .node .bubble{width:48px;height:48px;border-radius:18px;background:var(--ink);color:var(--accent);display:grid;place-items:center;font-weight:950;font-size:15px;letter-spacing:-.04em;margin-bottom:12px}.node.done .bubble{background:var(--green);color:white}
+    .node h4{margin:0;font-size:15px;line-height:1.08;letter-spacing:-.03em}.node small{display:block;color:var(--muted);font-weight:800;margin-top:8px}.node .status{margin-top:12px;font-size:11px;font-weight:950;text-transform:uppercase;color:var(--muted)}
+    .detail{margin-top:20px;background:#111827;color:white;border-radius:26px;padding:24px;display:grid;grid-template-columns:1fr .92fr;gap:22px;align-items:start}
+    .detail h3{font-size:30px;line-height:1;margin:0 0 10px;letter-spacing:-.05em}.detail p{color:rgba(255,255,255,.76)}
+    .detail-list{display:grid;gap:10px;margin:18px 0 0;padding:0;list-style:none}.detail-list li{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:12px;color:rgba(255,255,255,.88)}
+    .learn-box{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px}.learn-box a{display:block;color:white;text-decoration:none;font-weight:850;margin:10px 0}.learn-box a:hover{text-decoration:underline}.learn-box span{display:block;color:rgba(255,255,255,.62);font-size:13px}
+    .check-row{display:flex;align-items:center;gap:10px;margin-top:14px}.check-row input{width:19px;height:19px;accent-color:var(--green)}
+    .table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid var(--line);background:white}.table th,.table td{text-align:left;padding:14px;border-bottom:1px solid var(--line);vertical-align:top}.table th{background:#111827;color:white;font-size:12px;text-transform:uppercase;letter-spacing:.08em}.table tr:last-child td{border-bottom:0}.table td:first-child{font-weight:900}
+    .template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.template-card{background:white;border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 10px 26px rgba(17,24,39,.05)}
+    .template-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.template-head h3{font-size:18px;margin:0;letter-spacing:-.04em}.copy{border:0;border-radius:999px;background:var(--ink);color:white;font-weight:900;padding:8px 10px;cursor:pointer;font-size:12px}.copy:hover{background:#000}.copy.copied{background:var(--green)}
+    pre.prompt{white-space:pre-wrap;margin:0;background:#f5f3ee;border:1px solid #e5dfd4;border-radius:16px;padding:14px;color:#1f2937;font-family:"SFMono-Regular",Consolas,Monaco,monospace;font-size:13px;line-height:1.45;max-height:310px;overflow:auto}
+    .challenge{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}.day{background:white;border:1px solid var(--line);border-radius:20px;padding:14px;min-height:150px;box-shadow:0 10px 26px rgba(17,24,39,.05)}.day input{accent-color:var(--green)}.day h4{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;font-size:16px}.day p{font-size:13px;margin:0 0 8px;color:#4b5563}.day strong{font-size:12px;color:var(--ink)}.day.done{background:#effff4;border-color:rgba(22,163,74,.36)}
+    .score-card{display:grid;grid-template-columns:1fr 260px;gap:18px;align-items:start}.score-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.score-item{background:white;border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;gap:10px;align-items:start;font-weight:750}.score-item input{margin-top:3px;accent-color:var(--green)}.score-meter{background:#111827;color:white;border-radius:24px;padding:22px;text-align:center;position:sticky;top:92px}.score-meter strong{display:block;font-size:64px;line-height:1;letter-spacing:-.07em}.score-meter span{color:rgba(255,255,255,.72);font-weight:800}.score-verdict{margin-top:16px;border-radius:16px;padding:12px;background:rgba(255,255,255,.08);font-weight:850}
+    .resources{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.resource{background:white;border:1px solid var(--line);border-radius:22px;padding:17px;display:flex;flex-direction:column;gap:10px;box-shadow:0 10px 26px rgba(17,24,39,.05)}.resource h3{font-size:17px;line-height:1.1;margin:0}.resource p{font-size:14px;color:var(--muted);margin:0}.resource a{margin-top:auto;text-decoration:none;font-weight:900;color:var(--ink);display:inline-flex;gap:8px}.resource a:hover{text-decoration:underline}.badge-row{display:flex;gap:6px;flex-wrap:wrap}.badge{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:950;border-radius:999px;padding:4px 7px;background:var(--soft);color:#52545c}.badge.free{background:#dcfce7;color:#166534}.badge.video{background:#e0f2fe;color:#075985}.badge.docs{background:#ede9fe;color:#5b21b6}.badge.course{background:#fff7ed;color:#9a3412}.badge.official{background:#fef9c3;color:#854d0e}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 12px;font-weight:900;cursor:pointer}.tab.active{background:var(--ink);color:white;border-color:var(--ink)}
+    .accordion{display:grid;gap:12px}.acc{background:white;border:1px solid var(--line);border-radius:18px;overflow:hidden}.acc button{width:100%;border:0;background:white;padding:17px;text-align:left;display:flex;justify-content:space-between;gap:12px;font-size:16px;font-weight:950;cursor:pointer}.acc .content{display:none;padding:0 17px 17px;color:var(--muted)}.acc.open .content{display:block}.acc.open button{background:#fffbe8}
+    .footer{padding:42px 0 60px}.footer-card{background:#111827;color:white;border-radius:32px;padding:30px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center;box-shadow:var(--shadow)}.footer-card h2{margin:0;font-size:36px;line-height:1;letter-spacing:-.06em}.footer-card p{color:rgba(255,255,255,.72);margin:8px 0 0}.footer-card .btn{box-shadow:none}
+    .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:#111827;color:white;padding:12px 16px;border-radius:999px;font-weight:900;opacity:0;pointer-events:none;transition:.25s ease;z-index:80}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    @media (max-width:980px){.hero-grid,.detail,.score-card{grid-template-columns:1fr}.nodes{grid-template-columns:repeat(2,1fr)}.skilltree:before{display:none}.grid.three,.grid.four,.resources,.template-grid{grid-template-columns:1fr 1fr}.challenge{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}}
+    @media (max-width:640px){.wrap{padding:0 14px}.nav{padding:12px 14px}.hero{padding-top:28px}.hero-card{padding:24px;border-radius:26px;min-height:auto}.nodes,.grid.two,.grid.three,.grid.four,.resources,.template-grid,.challenge,.score-items{grid-template-columns:1fr}.detail h3{font-size:25px}.footer-card{grid-template-columns:1fr}.section-title{display:block}.card,.panel,.skilltree{padding:18px}.table{font-size:13px}.table th,.table td{padding:11px}.score-meter{position:static}.hero-actions .btn{width:100%;justify-content:center}}
+    @media print{.topbar,.hero-actions,.copy,.tabs,.toast{display:none!important}body{background:white}.card,.panel,.skilltree,.resource,.template-card,.day{box-shadow:none}.hero-card{background:#111827!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}section{break-inside:avoid}.detail{background:#111827!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <nav class="nav">
+      <div class="brandmark"><span class="dot">AI</span><span>Prompting Roadmap</span></div>
+      <div class="navlinks">
+        <a href="#skilltree">Skill Tree</a>
+        <a href="#templates">Templates</a>
+        <a href="#challenge">14-Day Challenge</a>
+        <a href="#score">Checklist</a>
+        <a href="#resources">References</a>
+      </div>
+    </nav>
+    <div class="progress-shell"><div class="progress-fill" id="globalProgress"></div></div>
+  </div>
+
+  <header class="hero wrap">
+    <div class="hero-grid">
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="eyebrow">
+            <span class="pill yellow">FREE GUIDE</span>
+            <span class="pill">DM: PROMPT</span>
+            <span class="pill">@ai_with_mudit</span>
+          </div>
+          <h1>Prompting Roadmap 0 to 100</h1>
+          <p class="subtitle">Learn how to use English as an execution tool: captions, study plans, research briefs, workflows, product specs, automations, and AI-built projects.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#skilltree">Start the skill tree →</a>
+            <a class="btn ghost" href="#templates">Copy templates</a>
+            <button class="btn ghost" onclick="window.print()">Print / save as PDF</button>
+          </div>
+        </div>
+      </div>
+      <aside class="hero-side">
+        <div class="stat-card">
+          <span class="tag">What this is</span>
+          <h3>A practical prompt operating system</h3>
+          <p>Not fancy words. Not magic prompts. This teaches you how to define outcome, context, constraints, format, and quality bar.</p>
+          <div class="quote">A prompt is not a magic sentence. A prompt is a work order.</div>
+        </div>
+        <div class="stat-card">
+          <span class="tag">Inside</span>
+          <div class="stat-grid">
+            <div class="metric"><strong>7</strong><span>Skill levels</span></div>
+            <div class="metric"><strong>14</strong><span>Practice days</span></div>
+            <div class="metric"><strong>18+</strong><span>References</span></div>
+            <div class="metric"><strong>100</strong><span>Point checklist</span></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap" id="principles">
+      <div class="section-title">
+        <h2>Read this before you start</h2>
+        <p>This guide is built for the person who DMed “prompt” and wants to actually get better, not collect another PDF.</p>
+      </div>
+      <div class="grid four">
+        <div class="card"><span class="tag">01</span><h3>Do not chase fancy words</h3><p>Better prompting is about defining the outcome, context, rules, and quality bar.</p></div>
+        <div class="card"><span class="tag">02</span><h3>Practice on real tasks</h3><p>Use prompts on captions, notes, research, study plans, product ideas, and small tools.</p></div>
+        <div class="card"><span class="tag">03</span><h3>Build proof</h3><p>A good prompt creates something useful: a post, doc, brief, workflow, spec, script, or checklist.</p></div>
+        <div class="card"><span class="tag">04</span><h3>Iterate</h3><p>Your first answer is a draft. The skill is feedback, scoring, and improving the instruction.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="skilltree">
+      <div class="section-title">
+        <h2>The 0→100 skill tree</h2>
+        <p>Click a node to learn what to practice. Tick it when you finish the exercise. Your progress is saved in this browser.</p>
+      </div>
+      <div class="skilltree">
+        <div class="nodes" id="nodes"></div>
+        <div class="detail" id="skillDetail"></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="roadmap-table">
+      <div class="section-title"><h2>Roadmap at a glance</h2><p>Each level adds one new skill. Do not skip to advanced prompts before learning clear outputs.</p></div>
+      <div class="card">
+        <table class="table" aria-label="Prompting roadmap levels">
+          <thead><tr><th>Level</th><th>Skill</th><th>What you should be able to do</th></tr></thead>
+          <tbody id="roadmapRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="wrap" id="anatomy">
+      <div class="section-title"><h2>The prompt anatomy</h2><p>Use this when quality matters. You do not need all six parts every time, but serious output needs structure.</p></div>
+      <div class="grid three">
+        <div class="card"><span class="tag">Role</span><h3>Who should the AI act as?</h3><p>Example: Act as a social media strategist.</p></div>
+        <div class="card"><span class="tag">Task</span><h3>What should it create?</h3><p>Example: Create 10 reel hooks.</p></div>
+        <div class="card"><span class="tag">Context</span><h3>What changes the answer?</h3><p>Audience, goal, situation, background, references.</p></div>
+        <div class="card"><span class="tag">Input</span><h3>What material should it use?</h3><p>Paste the transcript, notes, topic, screenshot summary, data, or idea.</p></div>
+        <div class="card"><span class="tag">Format</span><h3>What should done look like?</h3><p>Table, checklist, script, JSON, email, plan, spec, or copy-paste version.</p></div>
+        <div class="card"><span class="tag">Constraints</span><h3>What must it avoid?</h3><p>Tone, length, style, things to include, things to avoid, success criteria.</p></div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h3>Universal template</h3>
+        <pre class="prompt" id="universalPrompt">Act as [role].
+Your task: [specific task].
+Context: [audience, goal, situation, background].
+Input: [paste the material or idea].
+Output format: [table / bullets / script / checklist / JSON / plan].
+Constraints: [tone, length, style, things to avoid].
+Before final answer, check the output against: [success criteria].
+
+Upgrade: Make reasonable assumptions, but list them before answering.</pre>
+        <button class="copy" onclick="copyText('universalPrompt', this)">Copy template</button>
+      </div>
+    </section>
+
+    <section class="wrap" id="examples">
+      <div class="section-title"><h2>Weak prompt → useful prompt</h2><p>Copy the pattern. Weak prompts ask for a topic. Strong prompts define audience, goal, format, constraints, and use case.</p></div>
+      <div class="grid two">
+        <div class="card"><span class="tag">Creator</span><h3>Weak: Give me reel ideas.</h3><p><strong>Strong:</strong> Give me 10 reel ideas for Indian students learning AI. Each idea must have a hook, 20-second script angle, caption value, and why someone would save it. Avoid generic productivity advice.</p></div>
+        <div class="card"><span class="tag">Student</span><h3>Weak: Explain DBMS.</h3><p><strong>Strong:</strong> Teach me DBMS normalization for an exam. Explain in simple words, give 3 examples, create 10 active recall questions, then give common mistakes and a 2-day revision plan.</p></div>
+        <div class="card"><span class="tag">Founder</span><h3>Weak: Make my app idea better.</h3><p><strong>Strong:</strong> I am building a turf booking app for Jaipur. Users need discovery, real-time slots, payments, and teams. Analyze the idea, list user flows, MVP screens, risks, and the first version I can test in 7 days.</p></div>
+        <div class="card"><span class="tag">Coding</span><h3>Weak: Build a website.</h3><p><strong>Strong:</strong> Create a landing page spec for a free prompting guide. Include sections, copy, CTA, form fields, mobile layout, success states, and implementation steps for a coding agent.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="templates">
+      <div class="section-title"><h2>Copy-paste prompt templates</h2><p>Use these on real tasks. Replace the brackets, keep the structure, and save the versions that produce good results.</p></div>
+      <div class="tabs" id="templateTabs"></div>
+      <div class="template-grid" id="templatesGrid"></div>
+    </section>
+
+    <section class="wrap" id="workflow">
+      <div class="section-title"><h2>Turn prompts into workflows</h2><p>The real skill is not one perfect prompt. It is a repeatable process that turns inputs into assets.</p></div>
+      <div class="grid four">
+        <div class="card"><span class="tag">Content</span><h3>Idea → Asset</h3><p>Idea → hooks → script → caption → pinned comment → thumbnail text → final post</p></div>
+        <div class="card"><span class="tag">Study</span><h3>Topic → Revision</h3><p>Topic → simple explanation → examples → active recall → test → weak areas → revision plan</p></div>
+        <div class="card"><span class="tag">Research</span><h3>Question → Brief</h3><p>Question → source list → summary → counterpoints → uncertainty → action checklist</p></div>
+        <div class="card"><span class="tag">Build</span><h3>Idea → MVP Spec</h3><p>Idea → user problem → feature list → screen map → product spec → code prompt → tests</p></div>
+      </div>
+      <div class="callout" style="margin-top:18px">Do not stop at ideas. Turn the answer into something usable: a doc, page, script, workflow, spec, or testable product.</div>
+    </section>
+
+    <section class="wrap" id="challenge">
+      <div class="section-title"><h2>The 14-day prompting challenge</h2><p>Do this and you will improve faster than watching 50 reels. Every day must create proof.</p></div>
+      <div class="challenge" id="challengeGrid"></div>
+    </section>
+
+    <section class="wrap" id="troubleshoot">
+      <div class="section-title"><h2>Prompt troubleshooting matrix</h2><p>When the output is bad, do not blame the model immediately. Fix the instruction first.</p></div>
+      <div class="card">
+        <table class="table">
+          <thead><tr><th>Problem</th><th>Likely cause</th><th>Fix</th></tr></thead>
+          <tbody>
+            <tr><td>Generic answer</td><td>No audience, goal, or examples.</td><td>Add audience, constraints, and 2 examples.</td></tr>
+            <tr><td>Too long</td><td>No length limit.</td><td>Set word, line, or section limit.</td></tr>
+            <tr><td>Wrong tone</td><td>No style direction.</td><td>Add tone, examples, and avoid list.</td></tr>
+            <tr><td>Misses details</td><td>Context not separated.</td><td>Use headings: Goal, Input, Rules, Output.</td></tr>
+            <tr><td>Makes things up</td><td>No source rules.</td><td>Ask it to cite sources or say “not sure.”</td></tr>
+            <tr><td>Messy output</td><td>No format specified.</td><td>Request exact table, checklist, or template.</td></tr>
+            <tr><td>Does not improve</td><td>No feedback loop.</td><td>Ask it to score and rewrite against criteria.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="grid five"></div>
+      <div class="grid two" style="margin-top:18px">
+        <div class="card"><span class="tag">20-minute routine</span><h3>Prompt upgrade sprint</h3><p>0-3 min: write messy prompt. 3-7: add audience, context, constraints, format. 7-12: ask AI to critique prompt. 12-16: run improved prompt. 16-20: rewrite once and save.</p></div>
+        <div class="card"><span class="tag">Troubleshooting prompt</span><h3>Diagnose before rewriting</h3><pre class="prompt" id="diagnosePrompt">The output below is not good enough. Diagnose why.
+My original prompt: [paste]
+AI output: [paste]
+My goal: [goal]
+Tell me what was missing from the prompt. Then rewrite the prompt and produce the improved output.</pre><button class="copy" onclick="copyText('diagnosePrompt', this)">Copy</button></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="score">
+      <div class="section-title"><h2>The 100-point prompt checklist</h2><p>Before sending an important prompt, score it quickly. A high score means clear enough to test, not perfect.</p></div>
+      <div class="score-card">
+        <div class="score-items" id="scoreItems"></div>
+        <div class="score-meter">
+          <span>Your score</span>
+          <strong id="scoreValue">0</strong>
+          <span>/ 100</span>
+          <div class="score-verdict" id="scoreVerdict">Below 60: rewrite the prompt.</div>
+          <button class="btn primary" style="margin-top:18px" onclick="resetScore()">Reset checklist</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="proof">
+      <div class="section-title"><h2>3 proof projects to become dangerous</h2><p>The goal is not to become “good at prompts.” The goal is to turn prompts into assets you can show.</p></div>
+      <div class="grid three">
+        <div class="card"><span class="tag">Project 1</span><h3>Personal AI content system</h3><p>Create a workflow that turns one idea into hooks, script, caption, pinned comment, and thumbnail text. Store it in a Google Doc.</p></div>
+        <div class="card"><span class="tag">Project 2</span><h3>Study operating system</h3><p>Pick one hard topic. Create explanations, examples, active recall questions, flashcards, and a weekly revision calendar.</p></div>
+        <div class="card"><span class="tag">Project 3</span><h3>Tiny product spec</h3><p>Write a product spec for a small tool: habit tracker, turf booking screen, study timer, caption generator, or expense tracker.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="resources">
+      <div class="section-title"><h2>Real-world reference vault</h2><p>Free-to-read or free-learning-option resources. Some platforms may require login. Certificates or graded items may cost, so skip paid certificates if your goal is learning.</p></div>
+      <div class="tabs" id="resourceTabs"></div>
+      <div class="resources" id="resourcesGrid"></div>
+    </section>
+
+    <section class="wrap" id="faq">
+      <div class="section-title"><h2>Quick doubts people have</h2><p>Use this when someone thinks prompting is either useless or too complicated.</p></div>
+      <div class="accordion">
+        <div class="acc"><button>Is prompting still useful when models are getting smarter? <span>+</span></button><div class="content">Yes, because smarter models still need clear goals, context, constraints, and success criteria. Better models reduce friction, but vague instructions still create vague output.</div></div>
+        <div class="acc"><button>Do I need to learn coding first? <span>+</span></button><div class="content">No. Start by learning how software thinks: users, screens, states, data, edge cases, permissions, and tests. That makes your English clearer for AI coding agents.</div></div>
+        <div class="acc"><button>What is the fastest way to improve? <span>+</span></button><div class="content">Take one messy prompt you actually use. Add audience, context, output format, constraints, and success criteria. Compare the old output and new output. Repeat for 14 days.</div></div>
+        <div class="acc"><button>Should I memorize prompts? <span>+</span></button><div class="content">No. Memorize prompt anatomy. Save templates that work for your tasks: content, study, research, business, and building. Your personal library beats random prompt lists.</div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <div class="footer-card">
+      <div>
+        <h2>Clear thinking written in English.</h2>
+        <p>AI makes vague people create vague output faster. Clear people get leverage. Follow @ai_with_mudit for prompts, tools, workflows, and real building experiments.</p>
+      </div>
+      <a class="btn primary" href="#skilltree">Restart roadmap</a>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Copied</div>
+
+  <script>
+    const skills = [
+      {id:'s0', level:'0-10', short:'Mental model', title:'The real meaning of a prompt', outcome:'Understand prompting as instruction design, not keyword hacking.', exercise:'Rewrite one vague prompt by adding audience, context, output format, constraints, and success criteria.', proof:'Before/after prompt document', refs:[['OpenAI: best practices', 'Official rules of thumb for being specific, defining format, and using examples.', 'https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api'], ['Learn Prompting: introduction', 'Free beginner-friendly explanation of prompt engineering.', 'https://learnprompting.org/docs/introduction']]},
+      {id:'s1', level:'10-25', short:'Prompt anatomy', title:'Role + Task + Context + Input + Format + Constraints', outcome:'Write prompts with task, context, input, constraints, and output format.', exercise:'Use the universal template for one content, one study, and one decision task.', proof:'3 working prompts saved', refs:[['Google Workspace Gemini Prompt Guide', 'Practical role-based prompting examples for daily work.', 'https://workspace.google.com/learning/content/gemini-prompt-guide'], ['Microsoft Learn: create effective prompts', 'Covers prompt elements and best practices.', 'https://learn.microsoft.com/en-us/training/modules/create-prompts-for-generative-ai-training-tools/']]},
+      {id:'s2', level:'25-40', short:'Context engineering', title:'Give context that changes the answer', outcome:'Brief the model with relevant background without dumping irrelevant information.', exercise:'Create a context block with Goal, Audience, Current situation, Assets, Style, Avoid.', proof:'Reusable context block', refs:[['Anthropic: prompt engineering overview', 'Strong reference for success criteria, iteration, and prompt structure.', 'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview'], ['Google: writing effective prompts', 'Workplace examples for adding context and scenarios.', 'https://workspace.google.com/intl/en_in/resources/ai/writing-effective-prompts/']]},
+      {id:'s3', level:'40-55', short:'Output control', title:'Define what done looks like', outcome:'Force structure: tables, scripts, checklists, JSON, emails, plans, specs.', exercise:'Take one messy AI answer and rerun it with exact output format commands.', proof:'Clean formatted answer', refs:[['OpenAI: prompt engineering best practices for ChatGPT', 'Guidance for clear, specific prompts with context.', 'https://help.openai.com/en/articles/10032626-prompt-engineering-best-practices-for-chatgpt'], ['Microsoft Foundry: prompt engineering techniques', 'Practical prompting techniques and validation reminder.', 'https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/prompt-engineering']]},
+      {id:'s4', level:'55-70', short:'Examples + iteration', title:'Use examples, scoring, and feedback loops', outcome:'Use examples, critique, scoring, and rewrite loops to improve output.', exercise:'Give 3 examples of your style, ask for 10 options, score them, then rewrite the top 3.', proof:'Style-matched output set', refs:[['Anthropic: multishot prompting', 'How examples help guide model behavior.', 'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/multishot-prompting'], ['PromptingGuide.ai', 'Free guide with techniques like zero-shot, few-shot, and chain-of-thought.', 'https://www.promptingguide.ai/']]},
+      {id:'s5', level:'70-85', short:'Workflow prompting', title:'Turn prompts into repeatable systems', outcome:'Chain prompts into repeatable systems for content, study, research, business, and coding.', exercise:'Design a 5-prompt workflow for one recurring task you do weekly.', proof:'Prompt workflow v1', refs:[['DeepLearning.AI: Building Systems with ChatGPT API', 'Short course on chains of prompts and systems.', 'https://www.deeplearning.ai/courses/chatgpt-building-system'], ['Microsoft: Generative AI for Beginners', 'Free 18-lesson course on fundamentals and building applications.', 'https://learn.microsoft.com/en-us/shows/generative-ai-for-beginners/']]},
+      {id:'s6', level:'85-100', short:'Building with English', title:'Write specs AI can execute', outcome:'Write specs AI can turn into pages, tools, automations, and MVPs.', exercise:'Write a tiny product spec with users, screens, data, rules, edge cases, and acceptance criteria.', proof:'MVP spec + test checklist', refs:[['Coursera/Vanderbilt: Prompt Engineering for ChatGPT', 'Structured prompt patterns course. Audit/free option may vary by region.', 'https://www.coursera.org/learn/prompt-engineering'], ['DeepLearning.AI: ChatGPT Prompt Engineering for Developers', 'Beginner course by Isa Fulford and Andrew Ng.', 'https://www.deeplearning.ai/courses/chatgpt-prompt-eng']]}
+    ];
+
+    const templates = [
+      {cat:'Everyday', name:'Prompt improver', text:'Improve this prompt so it produces a more specific, useful, and reliable output. Ask up to 3 clarifying questions only if absolutely necessary. Otherwise, make reasonable assumptions and give me the upgraded prompt.\n\nPrompt: [paste]'},
+      {cat:'Everyday', name:'Expert feedback', text:'Act as a strict but useful expert in [field]. Review my output below. Tell me what is weak, what is missing, what is generic, and how to make it 10/10. Then rewrite the final version.\n\nOutput: [paste]'},
+      {cat:'Content', name:'Caption engine', text:'Create an Instagram caption for [audience] about [topic]. First line must clearly explain why to read the caption. Make it save-worthy, specific, and not generic gyaan. Add 5 hashtags max. Give copy-paste format.'},
+      {cat:'Study', name:'Study coach', text:'Teach me [topic] from scratch. First explain it simply, then give examples, then test me with 10 active recall questions, then create a revision plan based on my weak answers.'},
+      {cat:'Research', name:'Research brief', text:'Research [topic] using reliable sources I provide or can verify. Give summary, key points, counterpoints, what is uncertain, and actions I can take. Clearly separate facts from assumptions.'},
+      {cat:'Business', name:'Decision helper', text:'I need to decide between [options]. Ask only essential questions. Then give a comparison table, tradeoffs, recommendation, and the risk if I choose wrong.'},
+      {cat:'Builder', name:'Workflow designer', text:'Design a repeatable AI workflow for [goal]. It should take this input: [input]. It should produce this output: [output]. Give each step, the exact prompt for each step, and the quality check after each step.'},
+      {cat:'Builder', name:'Spec writer', text:'Turn this idea into a product spec for an AI coding tool. Include user story, screens, components, database fields, edge cases, acceptance criteria, and tests.\n\nIdea: [idea]'},
+      {cat:'Builder', name:'Automation mapper', text:'I currently do this manually: [process]. Break it into steps. Identify what can be automated with AI, what needs human review, what free/no-code tools might be needed, and the first version I can test.'},
+      {cat:'Builder', name:'Agent instruction', text:'You are an AI assistant for [goal]. Your job is to [task]. Ask clarifying questions only when blocked. Follow these rules: [rules]. Output must be: [format]. Success criteria: [criteria].'},
+      {cat:'Content', name:'Style cloning safely', text:'Analyze the writing style of the examples below. Extract structure, pacing, vocabulary, sentence length, and tone. Do not copy exact lines. Create original output on [topic] in a similar structural style.\n\nExamples: [paste]'},
+      {cat:'Everyday', name:'Deep critique loop', text:'Give me 3 versions of the output. Then act as a critic and reject weak parts. Then combine the strongest parts into one final version.\n\nTopic/input: [paste]'}
+    ];
+
+    const challenge = [
+      ['Rewrite 5 vague prompts using the 6-part anatomy.','Before/after prompt doc'],
+      ['Create 10 hooks for one reel idea and score them.','Hook bank'],
+      ['Make one study plan for a hard topic.','7-day study plan'],
+      ['Summarize one long article/video into action points.','1-page brief'],
+      ['Create one caption using audience/context constraints.','Copy-paste caption'],
+      ['Use examples to match your style.','3 style-matched outputs'],
+      ['Ask AI to critique your own prompt.','Improved prompt'],
+      ['Build a content workflow.','5-step prompt chain'],
+      ['Build a research workflow.','Research prompt chain'],
+      ['Write a product spec for a tiny tool.','MVP spec'],
+      ['Ask AI to find edge cases in the spec.','Edge case list'],
+      ['Create acceptance criteria and tests.','Testing checklist'],
+      ['Turn one AI output into a real asset.','Post, doc, page, script, tool'],
+      ['Review everything and create your personal prompt library.','Prompt library v1']
+    ];
+
+    const checklist = [
+      'Task is specific enough that a stranger can understand it.',
+      'Audience or user is defined.',
+      'Context is separated and relevant.',
+      'Input material is included or clearly described.',
+      'Output format is exact.',
+      'Constraints are clear: length, tone, style, rules.',
+      'Examples are included when style matters.',
+      'Success criteria are included.',
+      'The prompt asks for review, scoring, or iteration when quality matters.',
+      'The final output becomes an asset, not just an idea.'
+    ];
+
+    const resources = [
+      {cat:'Official docs', title:'OpenAI Help: Best practices for prompt engineering', desc:'Official rules of thumb: use latest models, put instructions first, be specific, define format, use examples.', url:'https://help.openai.com/en/articles/6654000-best-practices-for-prompt-engineering-with-the-openai-api', tags:['free','official','docs']},
+      {cat:'Official docs', title:'OpenAI Help: Prompt engineering best practices for ChatGPT', desc:'Clear and specific ChatGPT prompting guidance for everyday users.', url:'https://help.openai.com/en/articles/10032626-prompt-engineering-best-practices-for-chatgpt', tags:['free','official','docs']},
+      {cat:'Official docs', title:'Anthropic Claude Docs: Prompt engineering overview', desc:'Success criteria, prompt structure, chaining, examples, and iteration.', url:'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/overview', tags:['free','official','docs']},
+      {cat:'Official docs', title:'Anthropic Claude Docs: Multishot prompting', desc:'How examples guide model behavior and reduce randomness.', url:'https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/multishot-prompting', tags:['free','official','docs']},
+      {cat:'Official docs', title:'Google Workspace: Gemini Prompt Guide', desc:'Practical prompt guide organized by role and use case.', url:'https://workspace.google.com/learning/content/gemini-prompt-guide', tags:['free','official','docs']},
+      {cat:'Official docs', title:'Google Workspace: Writing effective prompts', desc:'Strong prompt design examples for Gemini at work.', url:'https://workspace.google.com/intl/en_in/resources/ai/writing-effective-prompts/', tags:['free','official','docs']},
+      {cat:'Courses', title:'DeepLearning.AI: ChatGPT Prompt Engineering for Developers', desc:'Short beginner course by Isa Fulford and Andrew Ng for building with LLMs.', url:'https://www.deeplearning.ai/courses/chatgpt-prompt-eng', tags:['free option','course']},
+      {cat:'Courses', title:'DeepLearning.AI: AI Prompting for Everyone', desc:'Prompting course for everyday work and non-technical users.', url:'https://www.deeplearning.ai/courses/ai-prompting-for-everyone', tags:['free option','course']},
+      {cat:'Courses', title:'DeepLearning.AI: Building Systems with the ChatGPT API', desc:'Learn chains of prompts and workflow-style systems.', url:'https://www.deeplearning.ai/courses/chatgpt-building-system', tags:['free option','course']},
+      {cat:'Courses', title:'Coursera/Vanderbilt: Prompt Engineering for ChatGPT', desc:'Longer structured course on prompt patterns. Audit/free option may vary. Certificates may cost.', url:'https://www.coursera.org/learn/prompt-engineering', tags:['audit option','course']},
+      {cat:'Courses', title:'Microsoft Learn: Create effective prompts', desc:'Training module on prompt elements and best practices.', url:'https://learn.microsoft.com/en-us/training/modules/create-prompts-for-generative-ai-training-tools/', tags:['free','official','course']},
+      {cat:'Courses', title:'Microsoft Learn: Generative AI for Beginners', desc:'18-lesson course on generative AI fundamentals and building apps.', url:'https://learn.microsoft.com/en-us/shows/generative-ai-for-beginners/', tags:['free','official','video']},
+      {cat:'Written guides', title:'PromptingGuide.ai', desc:'Free written guide covering techniques, papers, examples, and advanced concepts.', url:'https://www.promptingguide.ai/', tags:['free','docs']},
+      {cat:'Written guides', title:'Learn Prompting: Free beginner guide', desc:'Comprehensive guide for people starting from zero.', url:'https://learnprompting.org/docs/introduction', tags:['free','docs']},
+      {cat:'Written guides', title:'Learn Prompting: Basics introduction', desc:'Beginner module about how to work with AI tools and prompting techniques.', url:'https://learnprompting.org/docs/basics/introduction', tags:['free','docs']},
+      {cat:'Video', title:'Microsoft: Understanding prompt engineering fundamentals', desc:'Video lesson from Generative AI for Beginners.', url:'https://learn.microsoft.com/en-us/shows/generative-ai-for-beginners/understanding-prompt-engineering-fundamentals-generative-ai-for-beginners', tags:['free','official','video']},
+      {cat:'Video', title:'DeepLearning.AI YouTube: Prompt Engineering for Developers', desc:'Video reference for learners who prefer watching before practicing.', url:'https://www.youtube.com/watch?v=H4YK_7MAckk', tags:['free','video']},
+      {cat:'Practice', title:'Microsoft Foundry: Prompt engineering techniques', desc:'Practical techniques plus reminder to validate model outputs.', url:'https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/prompt-engineering', tags:['free','official','docs']}
+    ];
+
+    let activeSkill = localStorage.getItem('activeSkill') || 's0';
+
+    function getDoneSkills(){ return JSON.parse(localStorage.getItem('doneSkills') || '[]'); }
+    function setDoneSkills(arr){ localStorage.setItem('doneSkills', JSON.stringify(arr)); }
+    function getDoneDays(){ return JSON.parse(localStorage.getItem('doneDays') || '[]'); }
+    function setDoneDays(arr){ localStorage.setItem('doneDays', JSON.stringify(arr)); }
+
+    function renderSkillTree(){
+      const done = getDoneSkills();
+      const nodes = document.getElementById('nodes');
+      nodes.innerHTML = skills.map(s => `
+        <button class="node ${s.id===activeSkill?'active':''} ${done.includes(s.id)?'done':''}" onclick="selectSkill('${s.id}')">
+          <div>
+            <div class="bubble">${s.level}</div>
+            <h4>${s.short}</h4>
+            <small>${s.title}</small>
+          </div>
+          <div class="status">${done.includes(s.id)?'Done':'Click to learn'}</div>
+        </button>`).join('');
+      renderSkillDetail();
+      updateGlobalProgress();
+    }
+
+    function renderSkillDetail(){
+      const s = skills.find(x => x.id===activeSkill) || skills[0];
+      const done = getDoneSkills();
+      const checked = done.includes(s.id) ? 'checked' : '';
+      document.getElementById('skillDetail').innerHTML = `
+        <div>
+          <span class="pill yellow">Level ${s.level}</span>
+          <h3>${s.title}</h3>
+          <p>${s.outcome}</p>
+          <ul class="detail-list">
+            <li><strong>Exercise:</strong> ${s.exercise}</li>
+            <li><strong>Proof to create:</strong> ${s.proof}</li>
+          </ul>
+          <label class="check-row"><input type="checkbox" ${checked} onchange="toggleSkill('${s.id}', this.checked)"> Mark this node complete</label>
+        </div>
+        <div class="learn-box">
+          <strong>Learn from real references</strong>
+          ${s.refs.map(r => `<a href="${r[2]}" target="_blank" rel="noopener">${r[0]} ↗<span>${r[1]}</span></a>`).join('')}
+        </div>`;
+    }
+
+    function selectSkill(id){ activeSkill = id; localStorage.setItem('activeSkill', id); renderSkillTree(); }
+    function toggleSkill(id, isDone){
+      let done = getDoneSkills();
+      if(isDone && !done.includes(id)) done.push(id);
+      if(!isDone) done = done.filter(x => x!==id);
+      setDoneSkills(done); renderSkillTree();
+    }
+
+    function renderRoadmap(){
+      document.getElementById('roadmapRows').innerHTML = skills.map(s => `<tr><td>${s.level}</td><td>${s.short}</td><td>${s.outcome}</td></tr>`).join('');
+    }
+
+    function renderTemplates(cat='All'){
+      const cats = ['All', ...new Set(templates.map(t=>t.cat))];
+      document.getElementById('templateTabs').innerHTML = cats.map(c => `<button class="tab ${c===cat?'active':''}" onclick="renderTemplates('${c}')">${c}</button>`).join('');
+      const list = cat==='All' ? templates : templates.filter(t=>t.cat===cat);
+      document.getElementById('templatesGrid').innerHTML = list.map((t,i) => {
+        const id = `tpl_${cat.replace(/\W/g,'')}_${i}`;
+        return `<article class="template-card"><div class="template-head"><h3>${t.name}</h3><button class="copy" onclick="copyText('${id}', this)">Copy</button></div><pre class="prompt" id="${id}">${escapeHtml(t.text)}</pre></article>`;
+      }).join('');
+    }
+
+    function renderChallenge(){
+      const done = getDoneDays();
+      document.getElementById('challengeGrid').innerHTML = challenge.map((d,i)=>{
+        const day = i+1; const isDone = done.includes(day);
+        return `<div class="day ${isDone?'done':''}"><h4>Day ${day}<input type="checkbox" ${isDone?'checked':''} onchange="toggleDay(${day}, this.checked)"></h4><p>${d[0]}</p><strong>Proof: ${d[1]}</strong></div>`;
+      }).join('');
+      updateGlobalProgress();
+    }
+
+    function toggleDay(day, isDone){
+      let done = getDoneDays();
+      if(isDone && !done.includes(day)) done.push(day);
+      if(!isDone) done = done.filter(x => x!==day);
+      setDoneDays(done); renderChallenge();
+    }
+
+    function renderScore(){
+      document.getElementById('scoreItems').innerHTML = checklist.map((text,i)=>`<label class="score-item"><input type="checkbox" onchange="updateScore()" data-score-index="${i}"> <span>${text}</span></label>`).join('');
+      updateScore();
+    }
+    function updateScore(){
+      const boxes = [...document.querySelectorAll('[data-score-index]')];
+      const score = boxes.filter(b=>b.checked).length * 10;
+      document.getElementById('scoreValue').textContent = score;
+      let verdict = 'Below 60: rewrite the prompt.';
+      if(score >= 80) verdict = '80-100: strong enough to test. Now judge the output.';
+      else if(score >= 60) verdict = '60-80: usable, but add context, examples, or format.';
+      document.getElementById('scoreVerdict').textContent = verdict;
+    }
+    function resetScore(){ document.querySelectorAll('[data-score-index]').forEach(b=>b.checked=false); updateScore(); }
+
+    function renderResources(cat='All'){
+      const cats = ['All', ...new Set(resources.map(r=>r.cat))];
+      document.getElementById('resourceTabs').innerHTML = cats.map(c => `<button class="tab ${c===cat?'active':''}" onclick="renderResources('${c}')">${c}</button>`).join('');
+      const list = cat==='All' ? resources : resources.filter(r=>r.cat===cat);
+      document.getElementById('resourcesGrid').innerHTML = list.map(r=>`
+        <article class="resource">
+          <div class="badge-row">${r.tags.map(t=>`<span class="badge ${badgeClass(t)}">${t}</span>`).join('')}</div>
+          <h3>${r.title}</h3>
+          <p>${r.desc}</p>
+          <a href="${r.url}" target="_blank" rel="noopener">Open resource ↗</a>
+        </article>`).join('');
+    }
+
+    function badgeClass(t){
+      if(t.includes('free')) return 'free'; if(t==='video') return 'video'; if(t==='docs') return 'docs'; if(t==='course'||t.includes('option')) return 'course'; if(t==='official') return 'official'; return '';
+    }
+
+    function updateGlobalProgress(){
+      const total = skills.length + challenge.length;
+      const done = getDoneSkills().length + getDoneDays().length;
+      document.getElementById('globalProgress').style.width = Math.round(done/total*100)+'%';
+    }
+
+    function copyText(id, btn){
+      const el = document.getElementById(id);
+      const text = el.innerText || el.textContent;
+      navigator.clipboard.writeText(text).then(()=>{
+        btn.classList.add('copied'); btn.textContent = 'Copied'; showToast('Copied to clipboard');
+        setTimeout(()=>{ btn.classList.remove('copied'); btn.textContent = 'Copy'; }, 1500);
+      }).catch(()=>{
+        const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); showToast('Copied');
+      });
+    }
+    function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600); }
+    function escapeHtml(s){ return s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+
+    document.querySelectorAll('.acc button').forEach(btn=>btn.addEventListener('click',()=>btn.parentElement.classList.toggle('open')));
+
+    renderSkillTree(); renderRoadmap(); renderTemplates(); renderChallenge(); renderScore(); renderResources();
+  </script>
+</body>
+</html>
