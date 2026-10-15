@@ -6,7 +6,7 @@ Ye repo un sab guides ka compilation hai jo maine ab tak banaye hain — sab fre
 **Kaise use karo:** neeche list mein se guide kholo (PDF GitHub pe seedha render hota hai).
 Gumroad link bhi hai agar tum wahan se lena chaho (₹0+, pay what you want).
 
-> Instagram pe "Claude" DM karne pe yahi link milta hai.
+> Instagram pe "Claude" DM karne pe yahi link milta hai. Day 88 wale reel pe "quality" DM karne pe guide 19 milta hai. Day 113 wale reel pe "scale" DM karne pe guide 20 milta hai.
 
 ## Guides
 
@@ -30,11 +30,13 @@ Gumroad link bhi hai agar tum wahan se lena chaho (₹0+, pay what you want).
 | 16 | **Prompting Roadmap 0 to 100** | Free AI prompting guide, 0 se 100 tak | [PDF](guides/16-prompting-roadmap-0-to-100/Prompting_Roadmap_0_to_100.pdf) · [skill tree (HTML)](guides/16-prompting-roadmap-0-to-100/Prompting_Roadmap_Skilltree.html) | [link](https://muditjain35.gumroad.com/l/ppxykf) |
 | 17 | **3D Particles Prompt** | Browser mein interactive 3D particle playground banane ka prompt | [TXT](guides/17-3d-particles-prompt/3D_Particles_Prompt.txt) | [link](https://muditjain35.gumroad.com/l/svkreu) |
 | 18 | **Basic Song Prompt** | AI se gaana banane ka basic prompt | [PNG](guides/18-basic-song-prompt/Basic_Song_Prompt.png) | [link](https://muditjain35.gumroad.com/l/fckrf) |
+| 19 | **The Second Agent Check** | Apne AI agent ka kaam ek doosre, disconnected agent se check karwao — Builder/Tester workflow, copy-paste prompts, spiral (Day 88 reel ka guide) | [PDF](guides/19-second-agent-check/Second_Agent_Check.pdf) · [MD](guides/19-second-agent-check/Second_Agent_Check.md) | _(Gumroad link pending)_ |
+| 20 | **Solid, Scalable Software with AI Skills** | MVP ban gaya, ab solid banao: kaunsi skills (superpowers, gstack, interrogate, prompt-forge, LLM Council, Sentry, k6), kahan se, kab chalani hai. 7-stop workflow, copy-paste install, building rules, cheat sheet. English, colour edition (Day 113 reel ka guide) | [PDF](guides/20-solid-scalable-software-ai-skills/Solid_Scalable_Software_with_AI_Skills.pdf) | _(Gumroad link pending)_ |
 
 ## Kahan se shuru karun?
 
 * Bilkul beginner ho → **16 Prompting Roadmap** → **07 AI Tool Map** → **02 50 Free AI Tools**
-* Claude Code / Codex chalana hai → **11 Coding Agents** → **04 25 Skills** → **09 AI Rule Files**
+* Claude Code / Codex chalana hai → **11 Coding Agents** → **04 25 Skills** → **09 AI Rule Files** → **19 Second Agent Check** → **20 Solid, Scalable Software**
 * Reels banane hain → **10 Remotion** → **03 OpenMontage** → **05 AI Video Generation**
 
 ## Licence
