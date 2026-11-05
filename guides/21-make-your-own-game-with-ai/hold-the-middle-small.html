@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Hold the Middle</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #07090f;
+    overscroll-behavior: none;
+    touch-action: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  canvas {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
+    cursor: crosshair;
+  }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<script>
+"use strict";
+
+// Lets sound play even when an iPhone is in silent mode (other browsers ignore this).
+try {
+  if (navigator.audioSession) navigator.audioSession.type = "playback";
+} catch (e) {}
+
+// ============================================================
+// SETTINGS - the numbers that change how the game plays.
+// Sizes and speeds are measured against the shorter side of the
+// window, so the game feels the same on a laptop and a phone.
+// ============================================================
+const SETTINGS = {
+  // Master switch for every "feel good" effect (kick-back, muzzle flash, white flash on hit,
+  // screen shake, random hit pitch, game over low sound). Set to false to turn ALL of them off
+  // and play exactly like the version before the effects were added.
+  EFFECTS_ON: true,
+
+  // How big your player circle is (percent of the window's shorter side, as a radius).
+  PLAYER_RADIUS_PERCENT: 4.5,
+
+  // How long the barrel sticks out from the centre of the player (percent of the shorter side).
+  BARREL_LENGTH_PERCENT: 8,
+
+  // How thick the barrel is (percent of the shorter side).
+  BARREL_WIDTH_PERCENT: 1.8,
+
+  // How many bullets are fired every second while you hold down.
+  SHOTS_PER_SECOND: 8,
+
+  // How fast bullets fly (percent of the shorter side, per second). 100 = one screen-height per second.
+  BULLET_SPEED_PERCENT: 120,
+
+  // How big each bullet is (percent of the shorter side, as a radius).
+  BULLET_RADIUS_PERCENT: 0.9,
+
+  // Loudness of the shot sound, from 0 (silent) to 1 (very loud).
+  SHOT_VOLUME: 0.12,
+
+  // How long one shot sound lasts, in seconds. Smaller = shorter and sharper.
+  SHOT_SOUND_SECONDS: 0.07,
+
+  // Pitch of the shot sound at its start and its end, in Hz. A big drop makes it "pew".
+  SHOT_PITCH_START_HZ: 900,
+  SHOT_PITCH_END_HZ: 160,
+
+  // ---- Screen and text ----
+
+  // The smallest size text is allowed to be, so it stays easy to read on a small phone screen.
+  // Text sizes below are scaled so that "5 units" of text is never smaller than 5 times this
+  // many pixels. Raise it for bigger text on small screens.
+  MIN_TEXT_PIXELS_PER_UNIT: 5,
+
+  // Text is never allowed to be wider than this share of the window (0.92 = 92 percent),
+  // so nothing gets cut off on a narrow screen.
+  MAX_TEXT_WIDTH_SHARE: 0.92,
+
+  // ---- Enemies ----
+
+  // How many seconds a red square takes to travel from the edge to the player in WAVE 1.
+  // Later waves are faster (see the wave settings below). Bigger = slower enemies.
+  ENEMY_TRAVEL_SECONDS: 6,
+
+  // How much to even out enemy speed between screen edges, from 0 to 1.
+  // 0 = every enemy needs exactly the same time to arrive, so on a tall phone the ones from the
+  //     top and bottom are much faster than the ones from the sides.
+  // 1 = every enemy moves at the same speed, whichever edge it comes from.
+  // 0.5 is a fair middle for both wide and tall screens.
+  ENEMY_SPEED_EVENNESS: 0.5,
+
+  // How big each red square is (percent of the shorter side, the full width of the square).
+  ENEMY_SIZE_PERCENT: 6,
+
+  // How big each orange triangle is (percent of the shorter side). Smaller than the squares.
+  TRIANGLE_SIZE_PERCENT: 5,
+
+  // How many times faster an orange triangle moves than a red square in the same wave.
+  // 2.5 means it needs only 40 percent of the travel time.
+  TRIANGLE_SPEED_FACTOR: 2.5,
+
+  // ---- Waves (how quickly the game gets harder) ----
+
+  // How many red squares are in wave 1.
+  WAVE_FIRST_ENEMY_COUNT: 5,
+
+  // How many MORE red squares each new wave adds. Bigger = gets crowded faster.
+  WAVE_ENEMY_COUNT_GROWTH: 2,
+
+  // The most red squares one wave can ever have, so a very long game stays fair.
+  WAVE_MAX_ENEMY_COUNT: 30,
+
+  // How much faster enemies get with each new wave. 0.08 means 8 percent faster per wave
+  // (wave 2 is 1.08 times as fast as wave 1, wave 3 is 1.16 times, and so on).
+  WAVE_SPEED_GROWTH: 0.08,
+
+  // The fastest enemies can ever get, as a multiple of wave 1 speed. This is the speed limit:
+  // after this is reached, waves stop getting faster. 2 means twice the wave 1 speed.
+  WAVE_MAX_SPEED_MULTIPLIER: 2,
+
+  // The first wave that also sends orange triangles.
+  TRIANGLE_FIRST_WAVE: 3,
+
+  // How many orange triangles a wave sends, as a fraction of the waves since the first
+  // triangle wave. 0.5 means roughly one more triangle every two waves. Keep it small
+  // so triangles stay rarer than squares.
+  TRIANGLE_COUNT_GROWTH: 0.5,
+
+  // The most orange triangles one wave can ever have.
+  TRIANGLE_MAX_COUNT: 8,
+
+  // Seconds between one enemy appearing and the next, in wave 1.
+  WAVE_SPAWN_GAP_SECONDS: 1.5,
+
+  // How much shorter that gap gets with each new wave (seconds), so enemies arrive closer together.
+  WAVE_SPAWN_GAP_SHRINK: 0.08,
+
+  // The shortest the gap between enemies can ever get (seconds).
+  WAVE_SPAWN_GAP_MIN_SECONDS: 0.6,
+
+  // How long "Wave 1" shows before the very first wave starts (seconds).
+  WAVE_FIRST_INTRO_SECONDS: 1.5,
+
+  // The break between waves once all enemies are gone (seconds). The next wave's name shows during it.
+  WAVE_BREAK_SECONDS: 2,
+
+  // ---- Hits and scoring ----
+
+  // How many bright dots fly out when a bullet hits an enemy.
+  BURST_DOT_COUNT: 14,
+
+  // How fast the burst dots fly outwards (percent of the shorter side, per second).
+  BURST_SPEED_PERCENT: 35,
+
+  // How long the burst dots last, in seconds.
+  BURST_SECONDS: 0.45,
+
+  // How big each burst dot is (percent of the shorter side, as a radius).
+  BURST_DOT_RADIUS_PERCENT: 0.7,
+
+  // Loudness of the hit sound, from 0 (silent) to 1 (very loud).
+  HIT_VOLUME: 0.2,
+
+  // How long the hit sound lasts, in seconds.
+  HIT_SOUND_SECONDS: 0.16,
+
+  // Points you get for each enemy you hit.
+  POINTS_PER_HIT: 1,
+
+  // After "Game over" appears, clicks and taps are ignored for this many seconds,
+  // so you can't restart by accident while still shooting.
+  GAME_OVER_IGNORE_CLICKS_SECONDS: 0.5,
+
+  // ---- Effects (only used when EFFECTS_ON is true) ----
+
+  // How far the player is pushed back by each shot (percent of the shorter side).
+  KICK_PERCENT: 1.3,
+
+  // How quickly the player slides back to the middle after a kick. Bigger = snappier.
+  KICK_RETURN_SPEED: 22,
+
+  // How long the small flash at the end of the barrel lasts, in seconds.
+  MUZZLE_FLASH_SECONDS: 0.05,
+
+  // How big the muzzle flash is (percent of the shorter side, as a radius).
+  MUZZLE_FLASH_RADIUS_PERCENT: 1.9,
+
+  // How long an enemy shows pure white when hit, before it bursts, in seconds.
+  HIT_FLASH_SECONDS: 0.07,
+
+  // How strong the screen shake is for a hit (percent of the shorter side). Keep it tiny.
+  HIT_SHAKE_PERCENT: 0.45,
+
+  // How strong the screen shake is for game over (percent of the shorter side). Still small.
+  GAME_OVER_SHAKE_PERCENT: 1.8,
+
+  // How quickly screen shake fades away. Bigger = shorter shake.
+  SHAKE_FADE_SPEED: 11,
+
+  // How much the hit sound pitch can change at random: 0.15 means up to 15% higher or lower.
+  HIT_PITCH_VARIATION: 0.15,
+
+  // Loudness of the low game over sound, from 0 to 1.
+  GAME_OVER_SOUND_VOLUME: 0.3,
+
+  // How long the low game over sound lasts, in seconds.
+  GAME_OVER_SOUND_SECONDS: 0.7,
+
+  // If the game freezes or the tab is hidden, never count more than this many seconds
+  // as having passed in one step. Stops the game from jumping forward.
+  MAX_STEP_SECONDS: 0.05,
+
+  // Colours.
+  BACKGROUND_COLOR: "#07090f",
+  PLAYER_COLOR: "#5ee7ff",
+  BARREL_COLOR: "#ffffff",
+  BULLET_COLOR: "#ffd84d",
+  ENEMY_COLOR: "#ff3b3b",
+  TRIANGLE_COLOR: "#ff9a1f",
+  ENEMY_FLASH_COLOR: "#ffffff",
+  MUZZLE_FLASH_COLOR: "#fff6c2",
+  BURST_COLOR: "#fff3a8",
+  TEXT_COLOR: "#ffffff",
+  TEXT_DIM_COLOR: "#b9c4d6"
+};
+
+// ------------------------------------------------------------
+// Canvas and sizing
+// ------------------------------------------------------------
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+let width = 0;      // window width in CSS pixels
+let height = 0;     // window height in CSS pixels
+let unit = 1;       // 1 percent of the shorter side, in CSS pixels
+
+// ------------------------------------------------------------
+// Game state
+// ------------------------------------------------------------
+let state = "title";           // "title", "playing" or "over"
+let paused = false;            // true while the tab or app is hidden
+let aimAngle = -Math.PI / 2;   // starts pointing up until you move the pointer
+let aimX = null, aimY = null;  // last place the pointer was
+let firing = false;
+let activePointerId = null;
+let fireTimer = 0;             // seconds until the next shot
+let score = 0;
+let bestScore = 0;             // best score since the page was opened
+let overTimer = 0;             // seconds since "Game over" appeared
+const bullets = [];
+const enemies = [];
+const particles = [];
+
+// Wave state
+let wave = 1;                  // current wave number
+let wavePhase = "intro";       // "intro" (name showing, nothing sent yet) or "active" (enemies coming)
+let phaseTimer = 0;            // seconds left in the intro or break
+let spawnTimer = 0;            // seconds until the next enemy of this wave appears
+let spawnQueue = [];           // enemies this wave still has to send ("square" or "triangle")
+
+// Effects state (all stay empty/zero when EFFECTS_ON is false)
+let kickX = 0, kickY = 0;      // how far the player is pushed back right now
+let muzzleTimer = 0;           // seconds left on the muzzle flash
+let shakeAmp = 0;              // current screen shake strength in CSS pixels
+const ghosts = [];             // enemies that are flashing white just before they burst
+
+// When the window changes size or the phone turns, everything keeps its place relative to the
+// centre and is scaled with the new screen, so nothing is left stranded.
+function resize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (!w || !h) return;
+  const dpr = window.devicePixelRatio || 1;
+  const hadSize = width > 0 && height > 0;
+  const oldCx = width / 2;
+  const oldCy = height / 2;
+  const oldUnit = unit;
+
+  width = w;
+  height = h;
+  unit = Math.min(width, height) / 100;
+  canvas.width = Math.max(1, Math.round(width * dpr));
+  canvas.height = Math.max(1, Math.round(height * dpr));
+  ctx.setTransform(canvas.width / width, 0, 0, canvas.height / height, 0, 0);
+
+  if (hadSize) {
+    const s = unit / oldUnit;
+    const nx = width / 2;
+    const ny = height / 2;
+    const mapX = function (x) { return nx + (x - oldCx) * s; };
+    const mapY = function (y) { return ny + (y - oldCy) * s; };
+    for (let i = 0; i < bullets.length; i++) {
+      bullets[i].x = mapX(bullets[i].x);
+      bullets[i].y = mapY(bullets[i].y);
+    }
+    for (let i = 0; i < enemies.length; i++) {
+      const e = enemies[i];
+      e.x = mapX(e.x); e.y = mapY(e.y);
+      e.size *= s; e.speed *= s;
+    }
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x = mapX(p.x); p.y = mapY(p.y);
+      p.vx *= s; p.vy *= s;
+    }
+    for (let i = 0; i < ghosts.length; i++) {
+      const g = ghosts[i];
+      g.x = mapX(g.x); g.y = mapY(g.y);
+      g.bx = mapX(g.bx); g.by = mapY(g.by);
+      g.size *= s;
+    }
+    kickX *= s; kickY *= s;
+    shakeAmp *= s;
+    if (aimX !== null) { aimX = mapX(aimX); aimY = mapY(aimY); }
+  }
+}
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", resize);
+if (window.visualViewport) window.visualViewport.addEventListener("resize", resize);
+resize();
+
+// ------------------------------------------------------------
+// Sound (Web Audio, made in code)
+// ------------------------------------------------------------
+let audioCtx = null;
+let audioBroken = false;
+let noiseBuffer = null;
+
+function startAudio() {
+  if (audioBroken) return;
+  try {
+    if (!audioCtx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { audioBroken = true; return; }
+      audioCtx = new AC();
+    }
+    if (audioCtx.state !== "running") {
+      const p = audioCtx.resume();
+      if (p && p.catch) p.catch(function () {});
+    }
+  } catch (e) {
+    audioBroken = true;
+  }
+}
+
+function playShot() {
+  if (audioBroken || !audioCtx || audioCtx.state !== "running") return;
+  try {
+    const t = audioCtx.currentTime;
+    const len = SETTINGS.SHOT_SOUND_SECONDS;
+
+    const osc = audioCtx.createOscillator();
+    osc.type = "square";
+    osc.frequency.setValueAtTime(SETTINGS.SHOT_PITCH_START_HZ, t);
+    osc.frequency.exponentialRampToValueAtTime(Math.max(1, SETTINGS.SHOT_PITCH_END_HZ), t + len);
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(SETTINGS.SHOT_VOLUME, t + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + len + 0.02);
+    osc.onended = function () {
+      try { osc.disconnect(); gain.disconnect(); } catch (e) {}
+    };
+  } catch (e) {
+    audioBroken = true;
+  }
+}
+
+// Hit sound: a crunchy burst of noise plus a low thump. Sounds clearly different from the shot.
+// With effects on, the pitch is nudged up or down a little at random each time.
+function playHit() {
+  if (audioBroken || !audioCtx || audioCtx.state !== "running") return;
+  try {
+    const t = audioCtx.currentTime;
+    const len = SETTINGS.HIT_SOUND_SECONDS;
+    let pitch = 1;
+    if (SETTINGS.EFFECTS_ON) {
+      pitch = 1 + (Math.random() * 2 - 1) * SETTINGS.HIT_PITCH_VARIATION;
+    }
+
+    if (!noiseBuffer) {
+      const n = Math.floor(audioCtx.sampleRate * 0.3);
+      noiseBuffer = audioCtx.createBuffer(1, n, audioCtx.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < n; i++) data[i] = Math.random() * 2 - 1;
+    }
+
+    const noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(2400 * pitch, t);
+    filter.frequency.exponentialRampToValueAtTime(500 * pitch, t + len);
+    filter.Q.value = 0.8;
+    const nGain = audioCtx.createGain();
+    nGain.gain.setValueAtTime(SETTINGS.HIT_VOLUME, t);
+    nGain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    noise.connect(filter);
+    filter.connect(nGain);
+    nGain.connect(audioCtx.destination);
+    noise.start(t);
+    noise.stop(t + len + 0.02);
+
+    const osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(180 * pitch, t);
+    osc.frequency.exponentialRampToValueAtTime(45 * pitch, t + len);
+    const oGain = audioCtx.createGain();
+    oGain.gain.setValueAtTime(SETTINGS.HIT_VOLUME * 1.2, t);
+    oGain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    osc.connect(oGain);
+    oGain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + len + 0.02);
+
+    osc.onended = function () {
+      try {
+        noise.disconnect(); filter.disconnect(); nGain.disconnect();
+        osc.disconnect(); oGain.disconnect();
+      } catch (e) {}
+    };
+  } catch (e) {
+    audioBroken = true;
+  }
+}
+
+// Low, heavy sound for game over (effects only).
+function playGameOverSound() {
+  if (audioBroken || !audioCtx || audioCtx.state !== "running") return;
+  try {
+    const t = audioCtx.currentTime;
+    const len = SETTINGS.GAME_OVER_SOUND_SECONDS;
+
+    const osc = audioCtx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(110, t);
+    osc.frequency.exponentialRampToValueAtTime(32, t + len);
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(420, t);
+    filter.frequency.exponentialRampToValueAtTime(90, t + len);
+
+    const gain = audioCtx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.linearRampToValueAtTime(SETTINGS.GAME_OVER_SOUND_VOLUME, t + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + len);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + len + 0.02);
+    osc.onended = function () {
+      try { osc.disconnect(); filter.disconnect(); gain.disconnect(); } catch (e) {}
+    };
+  } catch (e) {
+    audioBroken = true;
+  }
+}
+
+// ------------------------------------------------------------
+// Waves
+// ------------------------------------------------------------
+
+// How many times faster than wave 1 the enemies are in a given wave (never above the speed limit).
+function waveSpeedMultiplier(n) {
+  const m = 1 + (n - 1) * SETTINGS.WAVE_SPEED_GROWTH;
+  return Math.min(Math.max(1, SETTINGS.WAVE_MAX_SPEED_MULTIPLIER), m);
+}
+
+function waveSpawnGap(n) {
+  const gap = SETTINGS.WAVE_SPAWN_GAP_SECONDS - (n - 1) * SETTINGS.WAVE_SPAWN_GAP_SHRINK;
+  return Math.max(0.05, SETTINGS.WAVE_SPAWN_GAP_MIN_SECONDS, gap);
+}
+
+// Get a wave ready: work out who comes, shuffle them, and show the wave name first.
+function startWave(n) {
+  wave = n;
+  const squares = Math.min(
+    SETTINGS.WAVE_MAX_ENEMY_COUNT,
+    Math.max(1, Math.round(SETTINGS.WAVE_FIRST_ENEMY_COUNT + (n - 1) * SETTINGS.WAVE_ENEMY_COUNT_GROWTH))
+  );
+  let triangles = 0;
+  if (n >= SETTINGS.TRIANGLE_FIRST_WAVE) {
+    triangles = Math.min(
+      SETTINGS.TRIANGLE_MAX_COUNT,
+      1 + Math.floor((n - SETTINGS.TRIANGLE_FIRST_WAVE) * SETTINGS.TRIANGLE_COUNT_GROWTH)
+    );
+  }
+  spawnQueue = [];
+  for (let i = 0; i < squares; i++) spawnQueue.push("square");
+  for (let i = 0; i < triangles; i++) spawnQueue.push("triangle");
+  for (let i = spawnQueue.length - 1; i > 0; i--) {   // shuffle
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = spawnQueue[i]; spawnQueue[i] = spawnQueue[j]; spawnQueue[j] = tmp;
+  }
+  wavePhase = "intro";
+  phaseTimer = (n === 1) ? SETTINGS.WAVE_FIRST_INTRO_SECONDS : SETTINGS.WAVE_BREAK_SECONDS;
+  spawnTimer = 0;
+}
+
+// ------------------------------------------------------------
+// Starting, losing and restarting
+// ------------------------------------------------------------
+function resetGame() {
+  bullets.length = 0;
+  enemies.length = 0;
+  particles.length = 0;
+  ghosts.length = 0;
+  kickX = 0;
+  kickY = 0;
+  muzzleTimer = 0;
+  shakeAmp = 0;
+  score = 0;
+  fireTimer = 0;
+  overTimer = 0;
+  firing = false;
+  activePointerId = null;
+  startWave(1);
+}
+
+function startGame() {
+  resetGame();
+  state = "playing";
+}
+
+function endGame() {
+  state = "over";
+  overTimer = 0;
+  firing = false;
+  activePointerId = null;
+  if (score > bestScore) bestScore = score;
+  if (SETTINGS.EFFECTS_ON) {
+    ghosts.length = 0;
+    shakeAmp = Math.max(shakeAmp, SETTINGS.GAME_OVER_SHAKE_PERCENT * unit);
+    playGameOverSound();
+  }
+}
+
+// ------------------------------------------------------------
+// Input (pointer events: mouse and finger work the same way)
+// ------------------------------------------------------------
+function setAim(x, y) {
+  aimX = x;
+  aimY = y;
+  const dx = x - width / 2;
+  const dy = y - height / 2;
+  if (dx * dx + dy * dy > 1) {
+    aimAngle = Math.atan2(dy, dx);
+  }
+}
+
+canvas.addEventListener("pointerdown", function (e) {
+  e.preventDefault();
+  startAudio();
+
+  if (state === "title") {
+    startGame();
+    setAim(e.clientX, e.clientY);   // barrel points where you clicked; shooting needs a new press
+    return;
+  }
+  if (state === "over") {
+    if (overTimer >= SETTINGS.GAME_OVER_IGNORE_CLICKS_SECONDS) {
+      startGame();
+      setAim(e.clientX, e.clientY);
+    }
+    return;
+  }
+
+  if (activePointerId !== null && e.pointerId !== activePointerId) return;
+  activePointerId = e.pointerId;
+  try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+  setAim(e.clientX, e.clientY);
+  if (!firing) {
+    firing = true;
+    fireTimer = 0;   // first shot comes out right away
+  }
+});
+
+canvas.addEventListener("pointermove", function (e) {
+  e.preventDefault();
+  if (state !== "playing") return;   // nothing moves before the game starts or after it ends
+  if (activePointerId !== null && e.pointerId !== activePointerId) return;
+  setAim(e.clientX, e.clientY);
+});
+
+function stopFiring(e) {
+  if (e.pointerId !== activePointerId) return;
+  activePointerId = null;
+  firing = false;
+}
+canvas.addEventListener("pointerup", stopFiring);
+canvas.addEventListener("pointercancel", stopFiring);
+canvas.addEventListener("lostpointercapture", stopFiring);
+
+// Stop the page from scrolling, zooming, selecting, dragging or showing menus.
+["contextmenu", "selectstart", "dragstart", "gesturestart", "gesturechange", "gestureend"].forEach(function (name) {
+  document.addEventListener(name, function (e) { e.preventDefault(); }, { passive: false });
+});
+["touchstart", "touchmove", "touchend"].forEach(function (name) {
+  document.addEventListener(name, function (e) { e.preventDefault(); }, { passive: false });
+});
+document.addEventListener("wheel", function (e) { e.preventDefault(); }, { passive: false });
+
+// If you switch away mid-hold, stop firing so it doesn't keep going unseen.
+window.addEventListener("blur", function () { firing = false; activePointerId = null; });
+
+// ------------------------------------------------------------
+// Pause when the tab or app is hidden, carry on when you come back
+// ------------------------------------------------------------
+function pauseGame() {
+  paused = true;
+  firing = false;
+  activePointerId = null;
+  try {
+    if (audioCtx && audioCtx.state === "running") {
+      const p = audioCtx.suspend();
+      if (p && p.catch) p.catch(function () {});
+    }
+  } catch (e) {}
+}
+
+function resumeGame() {
+  paused = false;
+  lastTime = null;   // restart the clock so nothing jumps forward
+  try {
+    if (audioCtx && audioCtx.state !== "running") {
+      const p = audioCtx.resume();
+      if (p && p.catch) p.catch(function () {});
+    }
+  } catch (e) {}
+  resize();
+}
+
+document.addEventListener("visibilitychange", function () {
+  if (document.hidden) pauseGame(); else resumeGame();
+});
+window.addEventListener("pagehide", pauseGame);
+window.addEventListener("pageshow", function () {
+  if (!document.hidden) resumeGame();
+});
+
+// ------------------------------------------------------------
+// Game logic
+// ------------------------------------------------------------
+function spawnBullet(extraSeconds) {
+  const cx = width / 2;
+  const cy = height / 2;
+  const dirX = Math.cos(aimAngle);
+  const dirY = Math.sin(aimAngle);
+  const tip = (SETTINGS.BARREL_LENGTH_PERCENT) * unit;
+  const speed = SETTINGS.BULLET_SPEED_PERCENT * unit;
+  // extraSeconds: how long ago this shot really happened inside the current step,
+  // so shots stay evenly spaced even if a frame is long.
+  bullets.push({
+    x: cx + dirX * tip + dirX * speed * extraSeconds,
+    y: cy + dirY * tip + dirY * speed * extraSeconds,
+    vx: dirX,
+    vy: dirY
+  });
+  playShot();
+
+  // Effects: kick the player back and show a flash at the barrel (looks only, bullets are unchanged)
+  if (SETTINGS.EFFECTS_ON) {
+    kickX = -dirX * SETTINGS.KICK_PERCENT * unit;
+    kickY = -dirY * SETTINGS.KICK_PERCENT * unit;
+    muzzleTimer = SETTINGS.MUZZLE_FLASH_SECONDS;
+  }
+}
+
+function spawnEnemy(kind) {
+  const isTriangle = (kind === "triangle");
+  const size = (isTriangle ? SETTINGS.TRIANGLE_SIZE_PERCENT : SETTINGS.ENEMY_SIZE_PERCENT) * unit;
+  const half = size / 2;
+  const cx = width / 2;
+  const cy = height / 2;
+  const side = Math.floor(Math.random() * 4);   // 0 top, 1 right, 2 bottom, 3 left
+  let x, y;
+  if (side === 0) { x = Math.random() * width;  y = -half; }
+  else if (side === 1) { x = width + half;      y = Math.random() * height; }
+  else if (side === 2) { x = Math.random() * width;  y = height + half; }
+  else { x = -half;                             y = Math.random() * height; }
+
+  const dx = cx - x;
+  const dy = cy - y;
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  const stopDist = SETTINGS.PLAYER_RADIUS_PERCENT * unit + half;
+  const travel = Math.max(1, dist - stopDist);
+
+  // Speed: a blend between "every enemy needs the same time" (evenness 0) and
+  // "every enemy moves at the same speed" (evenness 1), so a tall phone screen feels fair
+  // whether the enemy comes from the short sides or the long sides.
+  const evenness = Math.min(1, Math.max(0, SETTINGS.ENEMY_SPEED_EVENNESS));
+  const typicalTravel = Math.max(1, (width / 2 + height / 2) / 2 - stopDist);
+  const blendedTravel = travel * (1 - evenness) + typicalTravel * evenness;
+
+  // That time gets shorter in later waves (up to the speed limit); triangles are faster still.
+  let travelSeconds = SETTINGS.ENEMY_TRAVEL_SECONDS / waveSpeedMultiplier(wave);
+  if (isTriangle) travelSeconds /= Math.max(0.1, SETTINGS.TRIANGLE_SPEED_FACTOR);
+  enemies.push({
+    kind: kind,
+    size: size,
+    x: x,
+    y: y,
+    dirX: dx / dist,
+    dirY: dy / dist,
+    speed: blendedTravel / Math.max(0.05, travelSeconds),
+    arrived: false
+  });
+}
+
+function spawnBurst(x, y) {
+  const count = Math.max(1, Math.round(SETTINGS.BURST_DOT_COUNT));
+  const speed = SETTINGS.BURST_SPEED_PERCENT * unit;
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = speed * (0.4 + Math.random() * 0.6);
+    particles.push({
+      x: x, y: y,
+      vx: Math.cos(a) * s,
+      vy: Math.sin(a) * s,
+      age: 0
+    });
+  }
+}
+
+// Does a bullet (circle) touch an enemy (its square outline)?
+function bulletTouchesEnemy(b, e) {
+  const half = e.size / 2;
+  const br = SETTINGS.BULLET_RADIUS_PERCENT * unit;
+  const nx = Math.max(e.x - half, Math.min(b.x, e.x + half));
+  const ny = Math.max(e.y - half, Math.min(b.y, e.y + half));
+  const dx = b.x - nx;
+  const dy = b.y - ny;
+  return dx * dx + dy * dy <= br * br;
+}
+
+function update(dt) {
+  // Title screen: nothing moves. Game over screen: everything is frozen except the click-ignore timer.
+  if (state === "over") {
+    overTimer += dt;
+    return;
+  }
+  if (state !== "playing") return;
+
+  const interval = 1 / Math.max(0.1, SETTINGS.SHOTS_PER_SECOND);
+
+  // Shooting (unchanged)
+  if (firing) {
+    fireTimer -= dt;
+    while (fireTimer <= 0) {
+      spawnBullet(-fireTimer);
+      fireTimer += interval;
+    }
+  } else {
+    fireTimer = 0;
+  }
+
+  // Waves: show the wave name, then send its enemies one by one
+  if (wavePhase === "intro") {
+    phaseTimer -= dt;
+    if (phaseTimer <= 0) {
+      wavePhase = "active";
+      spawnTimer = 0;   // first enemy comes right away
+    }
+  } else {
+    spawnTimer -= dt;
+    const gap = waveSpawnGap(wave);
+    while (spawnTimer <= 0 && spawnQueue.length > 0) {
+      spawnEnemy(spawnQueue.pop());
+      spawnTimer += gap;
+    }
+  }
+
+  // Enemies walk to the player and stop there
+  const cx = width / 2;
+  const cy = height / 2;
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    const stopDist = SETTINGS.PLAYER_RADIUS_PERCENT * unit + e.size / 2;
+    // Aim at the player's current centre (keeps working if the window is resized).
+    const dx = cx - e.x;
+    const dy = cy - e.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist <= stopDist) { e.arrived = true; continue; }
+    e.arrived = false;
+    const step = Math.min(e.speed * dt, dist - stopDist);
+    e.x += (dx / dist) * step;
+    e.y += (dy / dist) * step;
+    e.dirX = dx / dist;
+    e.dirY = dy / dist;
+    if (dist - step <= stopDist + 0.001) e.arrived = true;
+  }
+
+  // Bullets move in small steps so they cannot jump over an enemy
+  const speed = SETTINGS.BULLET_SPEED_PERCENT * unit;
+  const margin = SETTINGS.BULLET_RADIUS_PERCENT * unit + 2;
+  const maxStep = Math.max(1, SETTINGS.BULLET_RADIUS_PERCENT * unit);
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    const total = speed * dt;
+    const steps = Math.max(1, Math.ceil(total / maxStep));
+    const each = total / steps;
+    let hitIndex = -1;
+    for (let s = 0; s < steps && hitIndex < 0; s++) {
+      b.x += b.vx * each;
+      b.y += b.vy * each;
+      for (let j = 0; j < enemies.length; j++) {
+        if (bulletTouchesEnemy(b, enemies[j])) { hitIndex = j; break; }
+      }
+    }
+    if (hitIndex >= 0) {
+      const hitEnemy = enemies[hitIndex];
+      if (SETTINGS.EFFECTS_ON) {
+        // The enemy is already gone for the rules; a white look-alike shows for a moment,
+        // then the burst appears. Screen gets a tiny shake.
+        ghosts.push({
+          kind: hitEnemy.kind, size: hitEnemy.size,
+          x: hitEnemy.x, y: hitEnemy.y,
+          dirX: hitEnemy.dirX, dirY: hitEnemy.dirY,
+          bx: b.x, by: b.y, age: 0
+        });
+        shakeAmp = Math.max(shakeAmp, SETTINGS.HIT_SHAKE_PERCENT * unit);
+      } else {
+        spawnBurst(b.x, b.y);
+      }
+      playHit();
+      enemies.splice(hitIndex, 1);
+      bullets.splice(i, 1);
+      score += SETTINGS.POINTS_PER_HIT;
+      continue;
+    }
+    if (b.x < -margin || b.x > width + margin || b.y < -margin || b.y > height + margin) {
+      bullets.splice(i, 1);
+    }
+  }
+
+  // Burst dots
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.age += dt;
+    if (p.age >= SETTINGS.BURST_SECONDS) { particles.splice(i, 1); continue; }
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+  }
+
+  // Lose if any enemy has reached the player (bullets get their chance first this step)
+  for (let i = 0; i < enemies.length; i++) {
+    if (enemies[i].arrived) { endGame(); return; }
+  }
+
+  // Wave finished: everything has been sent and everything is gone, so get the next wave ready
+  if (wavePhase === "active" && spawnQueue.length === 0 && enemies.length === 0) {
+    startWave(wave + 1);
+  }
+}
+
+// Effects that need to keep running (shake also continues on the game over screen).
+function updateEffects(dt) {
+  if (!SETTINGS.EFFECTS_ON) return;
+
+  if (state === "playing") {
+    // White-flashing enemies turn into a burst when their flash ends
+    for (let i = ghosts.length - 1; i >= 0; i--) {
+      ghosts[i].age += dt;
+      if (ghosts[i].age >= SETTINGS.HIT_FLASH_SECONDS) {
+        spawnBurst(ghosts[i].bx, ghosts[i].by);
+        ghosts.splice(i, 1);
+      }
+    }
+    // Player slides back to the middle
+    const back = Math.exp(-SETTINGS.KICK_RETURN_SPEED * dt);
+    kickX *= back;
+    kickY *= back;
+    if (muzzleTimer > 0) muzzleTimer = Math.max(0, muzzleTimer - dt);
+  }
+
+  // Screen shake fades out
+  if (shakeAmp > 0) {
+    shakeAmp *= Math.exp(-SETTINGS.SHAKE_FADE_SPEED * dt);
+    if (shakeAmp < 0.05) shakeAmp = 0;
+  }
+}
+
+// ------------------------------------------------------------
+// Drawing
+// ------------------------------------------------------------
+const FONT = "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+
+// One "text unit". On big screens it equals a normal unit; on small screens it never drops
+// below the minimum, so text stays readable. Text positions use it too, so lines never overlap.
+function textUnit() {
+  return Math.max(unit, SETTINGS.MIN_TEXT_PIXELS_PER_UNIT);
+}
+
+function drawCentredText(text, y, sizeUnits, color, weight) {
+  let px = sizeUnits * textUnit();
+  ctx.font = (weight || "600") + " " + px + "px " + FONT;
+  const maxWidth = width * SETTINGS.MAX_TEXT_WIDTH_SHARE;
+  const w = ctx.measureText(text).width;
+  if (w > maxWidth && w > 0) {   // shrink so the text always fits across the window
+    px = px * maxWidth / w;
+    ctx.font = (weight || "600") + " " + px + "px " + FONT;
+  }
+  ctx.fillStyle = color;
+  ctx.fillText(text, width / 2, y);
+}
+
+// Draw one enemy in the current fill colour: a square, or a triangle pointing at the player.
+function drawEnemyShape(kind, x, y, size, dirX, dirY) {
+  if (kind === "triangle") {
+    const px = -dirY, py = dirX;   // sideways direction
+    const front = size * 0.55;
+    const back = size * 0.45;
+    const side = size * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(x + dirX * front, y + dirY * front);
+    ctx.lineTo(x - dirX * back + px * side, y - dirY * back + py * side);
+    ctx.lineTo(x - dirX * back - px * side, y - dirY * back - py * side);
+    ctx.closePath();
+    ctx.fill();
+  } else {
+    ctx.fillRect(x - size / 2, y - size / 2, size, size);
+  }
+}
+
+function draw() {
+  ctx.fillStyle = SETTINGS.BACKGROUND_COLOR;
+  ctx.fillRect(0, 0, width, height);
+
+  const cx = width / 2;
+  const cy = height / 2;
+  const tu = textUnit();
+
+  // Screen shake moves the playing field only (text stays steady). It is small, so enemies stay visible.
+  ctx.save();
+  if (SETTINGS.EFFECTS_ON && shakeAmp > 0) {
+    ctx.translate((Math.random() * 2 - 1) * shakeAmp, (Math.random() * 2 - 1) * shakeAmp);
+  }
+
+  // Muzzle flash (drawn first so it can never cover an enemy)
+  if (SETTINGS.EFFECTS_ON && muzzleTimer > 0 && state === "playing") {
+    const k = muzzleTimer / SETTINGS.MUZZLE_FLASH_SECONDS;
+    const reach = (SETTINGS.BARREL_LENGTH_PERCENT + 0.8) * unit;
+    ctx.globalAlpha = Math.min(1, k + 0.2);
+    ctx.fillStyle = SETTINGS.MUZZLE_FLASH_COLOR;
+    ctx.beginPath();
+    ctx.arc(cx + kickX + Math.cos(aimAngle) * reach,
+            cy + kickY + Math.sin(aimAngle) * reach,
+            SETTINGS.MUZZLE_FLASH_RADIUS_PERCENT * unit * (0.6 + 0.4 * k), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  // Enemies hit a moment ago, flashing white (same shape, size and place as the enemy was)
+  if (SETTINGS.EFFECTS_ON) {
+    ctx.fillStyle = SETTINGS.ENEMY_FLASH_COLOR;
+    for (let i = 0; i < ghosts.length; i++) {
+      const g = ghosts[i];
+      drawEnemyShape(g.kind, g.x, g.y, g.size, g.dirX, g.dirY);
+    }
+  }
+
+  // Enemies
+  for (let i = 0; i < enemies.length; i++) {
+    const e = enemies[i];
+    ctx.fillStyle = (e.kind === "triangle") ? SETTINGS.TRIANGLE_COLOR : SETTINGS.ENEMY_COLOR;
+    drawEnemyShape(e.kind, e.x, e.y, e.size, e.dirX, e.dirY);
+  }
+
+  // Bullets
+  ctx.fillStyle = SETTINGS.BULLET_COLOR;
+  const br = SETTINGS.BULLET_RADIUS_PERCENT * unit;
+  for (let i = 0; i < bullets.length; i++) {
+    ctx.beginPath();
+    ctx.arc(bullets[i].x, bullets[i].y, br, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Player and barrel (pushed back a little by the kick when effects are on)
+  const px = SETTINGS.EFFECTS_ON ? cx + kickX : cx;
+  const py = SETTINGS.EFFECTS_ON ? cy + kickY : cy;
+
+  ctx.strokeStyle = SETTINGS.BARREL_COLOR;
+  ctx.lineWidth = SETTINGS.BARREL_WIDTH_PERCENT * unit;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(px + Math.cos(aimAngle) * SETTINGS.BARREL_LENGTH_PERCENT * unit,
+             py + Math.sin(aimAngle) * SETTINGS.BARREL_LENGTH_PERCENT * unit);
+  ctx.stroke();
+
+  ctx.fillStyle = SETTINGS.PLAYER_COLOR;
+  ctx.shadowColor = SETTINGS.PLAYER_COLOR;
+  ctx.shadowBlur = 2.5 * unit;
+  ctx.beginPath();
+  ctx.arc(px, py, SETTINGS.PLAYER_RADIUS_PERCENT * unit, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Burst dots (fade out as they age)
+  ctx.fillStyle = SETTINGS.BURST_COLOR;
+  const pr = SETTINGS.BURST_DOT_RADIUS_PERCENT * unit;
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    ctx.globalAlpha = Math.max(0, 1 - p.age / SETTINGS.BURST_SECONDS);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, pr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  ctx.restore();
+
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  // Score and wave at the top (during play and on the game over screen)
+  if (state !== "title") {
+    drawCentredText("Score: " + score + "   |   Wave " + wave, Math.max(6 * tu, 30), 5, SETTINGS.TEXT_COLOR, "700");
+  }
+
+  // Big wave name while the next wave is getting ready (above the player, where no enemy can be)
+  if (state === "playing" && wavePhase === "intro") {
+    const total = (wave === 1) ? SETTINGS.WAVE_FIRST_INTRO_SECONDS : SETTINGS.WAVE_BREAK_SECONDS;
+    const elapsed = Math.max(0, total - phaseTimer);
+    const fadeIn = Math.min(1, elapsed / 0.25);
+    const fadeOut = Math.min(1, Math.max(0, phaseTimer) / 0.25);
+    ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
+    drawCentredText("Wave " + wave, cy - 20 * tu, 12, SETTINGS.TEXT_COLOR, "800");
+    ctx.globalAlpha = 1;
+  }
+
+  // Title screen
+  if (state === "title") {
+    ctx.fillStyle = "rgba(7, 9, 15, 0.6)";
+    ctx.fillRect(0, 0, width, height);
+    drawCentredText("Hold the Middle", cy - 9 * tu, 9, SETTINGS.TEXT_COLOR, "800");
+    drawCentredText("Click or tap to start", cy + 12 * tu, 4.2, SETTINGS.TEXT_DIM_COLOR, "500");
+  }
+
+  // Game over screen
+  if (state === "over") {
+    ctx.fillStyle = "rgba(7, 9, 15, 0.7)";
+    ctx.fillRect(0, 0, width, height);
+    drawCentredText("Game over", cy - 19 * tu, 9, SETTINGS.ENEMY_COLOR, "800");
+    drawCentredText("Score: " + score, cy - 8 * tu, 5.5, SETTINGS.TEXT_COLOR, "700");
+    drawCentredText("Wave: " + wave, cy - 1 * tu, 4.5, SETTINGS.TEXT_COLOR, "600");
+    drawCentredText("Best: " + bestScore, cy + 6 * tu, 4.5, SETTINGS.TEXT_COLOR, "600");
+    const ready = overTimer >= SETTINGS.GAME_OVER_IGNORE_CLICKS_SECONDS;
+    ctx.globalAlpha = ready ? 1 : 0.35;
+    drawCentredText("Click or tap to play again", cy + 17 * tu, 4.2, SETTINGS.TEXT_DIM_COLOR, "500");
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ------------------------------------------------------------
+// Main loop - uses real elapsed time
+// ------------------------------------------------------------
+let lastTime = null;
+
+function frame(now) {
+  if (paused) {
+    lastTime = null;   // while hidden, the clock does not run
+    draw();
+    requestAnimationFrame(frame);
+    return;
+  }
+  if (lastTime === null) lastTime = now;
+  let dt = (now - lastTime) / 1000;
+  lastTime = now;
+  if (dt < 0) dt = 0;
+  if (dt > SETTINGS.MAX_STEP_SECONDS) dt = SETTINGS.MAX_STEP_SECONDS;
+
+  update(dt);
+  updateEffects(dt);
+  draw();
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

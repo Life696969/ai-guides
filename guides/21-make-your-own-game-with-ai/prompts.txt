@@ -1,0 +1,353 @@
+Make Your Own Game with AI: all the prompts
+By Mudit, @ai_with_mudit
+
+============================================================
+The rules block
+============================================================
+
+You are helping me make a small game that runs in a web browser. I can't code, so I will only save your file and play it. Follow these rules for this whole chat:
+
+1. Everything goes in one HTML file. No libraries, images, sound files or fonts, and nothing loaded from any other website.
+2. Every time you change the game, give me the whole file, from the first line to the last, in one code block. Never give me a part of it, and never write things like "the rest stays the same".
+3. Change only what I ask for. Everything else must keep working exactly as it does now.
+4. Put the numbers that most change how the game plays in one block called SETTINGS at the very top of the script, each with a plain-English comment.
+5. All movement and timers use real elapsed time, so the game runs at the same speed on every screen. If the tab was hidden, the game must not jump forward when I come back.
+6. The game fills the whole window, looks sharp on any screen (use devicePixelRatio), and works on a wide laptop window and a tall phone screen. It adapts when the window changes size.
+7. Use pointer events, so a mouse and a finger work the same way. The page must not scroll, zoom or select text when I touch the game.
+8. Make all sound in code with the Web Audio API. Start it on my first click or tap, because browsers block sound before that. If sound fails, the game must keep working.
+9. After the code, write one short line saying what changed and one thing I should test. Don't explain the code.
+
+============================================================
+Step 1: aim and shoot
+============================================================
+
+Step 1: aim and shoot.
+
+Make a dark screen with my player, a bright circle, in the exact centre. A short barrel on the circle always points at my mouse or finger.
+
+While I hold the mouse button or keep my finger down, the player fires small bullets towards that point at a steady rate. Each shot makes a short, sharp sound. Bullets that leave the screen are removed.
+
+Don't add enemies, score or anything else yet.
+
+Done means: I can aim anywhere and hold to keep firing, and I hear every shot.
+
+============================================================
+Step 2: enemies and hits
+============================================================
+
+Step 2: enemies and hits.
+
+Add enemies: red squares that appear just outside a random edge of the screen and move straight towards the player at a steady speed. Start them slow: each one takes about 6 seconds to reach the player, on any screen size. A new one appears at a steady rate.
+
+When a bullet touches an enemy, both disappear. Show a small burst of bright dots there and play a short hit sound, different from the shot sound.
+
+When an enemy reaches the player, it just stops there for now. Don't add score or losing yet.
+
+Keep the aiming and shooting exactly as they are.
+
+Done means: enemies come from all four sides, and every hit gives me a burst and a sound.
+
+============================================================
+Step 3: score, losing, restart
+============================================================
+
+Step 3: score, losing and restart.
+
+Before the game starts, show the name [your game's name] and "Click or tap to start". Nothing moves until then.
+
+Add a score at the top of the screen: 1 point per enemy hit. If an enemy touches the player, the game stops and I see "Game over", my score, my best score since I opened the page, and "Click or tap to play again".
+
+Ignore clicks and taps for the first half second on the game over screen, so I can't restart by accident while still shooting.
+
+Restarting must reset everything: no enemies or bullets left over, score back to zero, starting speed again.
+
+Keep the aiming, shooting, enemies and hit effects exactly as they are.
+
+Done means: I can lose, see my score and play again, as many times as I like.
+
+============================================================
+Step 4: make it feel good
+============================================================
+
+Step 4: make it feel good.
+
+The rules don't change. Only how it feels changes. Add these effects:
+
+- Each shot: the player kicks back a little and a small flash appears at the barrel.
+- Each hit: the enemy flashes white for a moment before it bursts, the screen shakes a tiny bit, and the hit sound changes pitch slightly at random.
+- Game over: a bigger shake and a low sound.
+
+Keep the shake small, so I can always see every enemy. Effects must never hide an enemy.
+
+Put a setting called EFFECTS_ON at the top of SETTINGS. When I change it to false, every effect in this step turns off, and the game plays exactly as it did before.
+
+Keep the rules, score and restart exactly as they are.
+
+Done means: the same game feels much more satisfying, and switching EFFECTS_ON shows me the difference.
+
+============================================================
+Step 5: waves
+============================================================
+
+Step 5: waves.
+
+Replace the steady flow of enemies with waves. Show "Wave 1" in large text for a moment, send the wave, and when all its enemies are gone, give me a two second break and start the next one.
+
+Each wave has more enemies, and they move a little faster. From wave 3, add a second enemy: a small orange triangle that is much faster but appears less often. It behaves like the red squares in every other way.
+
+Show the current wave number next to the score, and on the game over screen.
+
+Put the settings for how quickly waves get harder in SETTINGS, with a clear comment on each. Speed must have a maximum, so a very long game stays fair.
+
+Keep the aiming, shooting, effects, score and restart exactly as they are. Restarting begins again at wave 1.
+
+Done means: it starts easy, gets harder, and I can change how hard it gets by editing numbers at the top.
+
+============================================================
+Step 6: phone ready
+============================================================
+
+Step 6: make it phone ready.
+
+No new features. Check and fix these:
+
+- On a tall phone screen, the score, wave text and game over text all fit and are easy to read. The player stays in the exact centre.
+- The enemies' starting distance and speed feel fair on a tall narrow screen as well as a wide one.
+- Holding a finger down doesn't open a menu, select text, or scroll the page.
+- Turning the phone or resizing the window doesn't break anything.
+- If I switch to another tab or app, the game pauses, and it continues when I come back.
+- Sound still works after coming back. Add this line, which may let sound play in silent mode on iPhones (other browsers ignore it): if (navigator.audioSession) navigator.audioSession.type = "playback";
+
+Keep everything else exactly as it is.
+
+Done means: it plays well with one thumb on a real phone.
+
+============================================================
+Report a bug
+============================================================
+
+When I [what I did], I expected [what should happen], but [what happened]. Fix only this, and give me the whole file.
+
+============================================================
+Report a bug to an agent
+============================================================
+
+When I [what I did], I expected [what should happen], but [what happened]. Find the cause first, then fix only this, and check it the way the rules file says.
+
+============================================================
+The code stopped halfway
+============================================================
+
+Your code stopped before the end of the file. Give me the whole file again, from the first line to the last, in one code block.
+
+============================================================
+Start a new chat (the chat got slow or forgetful)
+============================================================
+
+Here is my game so far. It works. Don't change anything yet. Reply only "Ready", and wait for my next step.
+
+============================================================
+Your own idea
+============================================================
+
+I can't code. I want to make a small browser game with AI, one step at a time.
+
+My game idea: [your idea in a sentence or two]
+
+Help me in this order:
+
+1. The core action: tell me the one thing the player does again and again.
+2. The right size. Tell me which fits, and why:
+   - Small: one HTML file, built in a chat. A few hours.
+   - Medium: a real project, built with a coding agent like Claude Code or Codex. Several systems, real art and sound. Days.
+   - Big: needs a real engine or a team, like a 3D open world or online multiplayer. If my idea is big, tell me plainly, find the fun part, and cut it down to a medium version.
+   Tell me plainly what you cut and why.
+3. The steps: write 6 steps for a small game or up to 10 for a medium one, each adding one thing, and each leaving a game I can play:
+   - Step 1 is the core action, with a sound.
+   - The next steps add what the player acts on, then how to win or lose, with a restart.
+   - One step is only for making it feel good: small effects and sounds, with a setting at the top that turns them off.
+   - One step is for getting harder over time.
+   - The last step is finishing it: phone ready, and ready to share.
+   - Prefer a mouse or a finger at every step. If my idea needs a keyboard by nature, keep the keyboard and tell me if that makes it laptop-only.
+   - If my game has levels or puzzles, each one must be possible to finish. Tell me how to check that.
+   - If exact timing is the heart of the game, like a rhythm game, include a step to calibrate timing, and tell me how I can judge it.
+4. Write each step as a prompt I can paste, in this form: what to add, what must stay exactly as it is, and "Done means:" followed by what I'll see when I play.
+5. If it's medium, also give me: the best framework for this game and why (check its current version, don't rely on memory, and tell me if you can't check), a rules file for this project (how we work, git, the framework's known traps, game feel, licences for art and sound, and keeping my laptop safe: browser tests use only a bundled test browser, never my own browser or profile, and clean up after themselves), and a first prompt that sets up the project.
+
+Don't write any game code yet.
+
+============================================================
+The rules file
+============================================================
+
+# Project rules
+
+A 2D browser game. Phaser 4.2.1, TypeScript, Vite. I don't read code: I play the game and judge it.
+
+## How we work
+- One system per request. Show me a short plan first, and wait for my yes.
+- Game rules live in plain TypeScript in src/rules, with no Phaser imports, and have Vitest tests.
+- Numbers and content live in data files in src/data, so I can change them without touching the game.
+- Don't tell me something works until the tests pass, the build passes, and you've run the game in a browser test. Then start the game for me and give me the link, or give me the exact command and where to type it, and tell me what to try.
+- After a fix fails twice, stop and tell me. Don't try a third.
+- Don't add features I didn't ask for. Don't install anything new without telling me why first.
+- Work only inside this folder.
+
+## Git
+- Commit only when I say "commit this". Each commit is my undo button.
+- If I say "undo everything since the last commit", first tell me what I'd lose, then do it.
+- Never force-push or rewrite history.
+
+## Phaser 4, not Phaser 3
+- Before using a Phaser feature, read the matching guide in node_modules/phaser/skills.
+- Most tutorials online are Phaser 3 and will mislead you. setTintFill, Light2D and BitmapMask are gone.
+- Math.TAU is now a full circle (2 pi). It used to be pi/2. Use radians carefully in aiming code.
+
+## Game feel
+- Every player action gets feedback in the same change: sound, movement, a visual.
+- Effects never hide an enemy or a threat. One setting, EFFECTS_ON, turns them all off.
+
+## Art and sound
+- Only use assets whose licence allows it. Record each one's source and licence in CREDITS.md.
+
+## Keep my laptop safe
+- Browser tests use Playwright's bundled browser only. Never launch my installed Chrome or Edge, and never touch my browser profile.
+- Delete temporary browser profiles and test folders on every exit, including failures and crashes.
+- Run any new repeated or long test once first, and tell me before repeating it.
+
+============================================================
+Milestone 1: set up
+============================================================
+
+This folder has my game, game.html, built in a chat. I want to turn it into a real project. Don't change the game yet.
+
+1. Read game.html, and tell me in five lines what the game does and how it's built.
+2. Set up git.
+3. Create the rules file, with exactly this text:
+[paste the rules file here]
+4. Commit game.html and the rules file as the first commit.
+5. Tell me the three things most likely to go wrong when we rebuild it properly.
+
+Stop there.
+
+Done means: there's one commit, the rules file exists, and I understand your summary.
+
+============================================================
+Milestone 2: rebuild it properly
+============================================================
+
+Rebuild this game as a real project. Show me your plan first, and wait for my yes.
+
+Use Phaser 4.2.1, TypeScript and Vite. It must play the same as game.html: same controls, enemies, waves, score, game over, effects and sounds. Don't add anything new.
+
+- Rules such as scoring, waves and enemy speed go in src/rules, with tests.
+- Every number in the old SETTINGS block goes in src/data/settings.ts, with a plain-English comment.
+- Add a browser test with Playwright's bundled browser that starts the game, holds to fire, and checks that the score can rise and the game can end.
+- It must look at least as sharp as game.html on a high-resolution phone. Phaser doesn't do this by default, so handle the device pixel ratio yourself and keep aiming accurate.
+- Keep game.html as it is, so I can compare.
+
+Done means: you start the game for me and give me the link, or tell me the exact command and where to type it. It plays like the old one, and the tests and build pass.
+
+============================================================
+Milestone 3: more enemies
+============================================================
+
+Add three new enemy types, and make enemies data, so I can add more without touching the game's code.
+
+- Zigzag: weaves from side to side as it comes in.
+- Tank: slow and big, takes 3 hits, and shows damage on each hit.
+- Splitter: breaks into two small fast enemies when killed.
+
+Each enemy is one entry in src/data/enemies.ts: its look, speed, health, movement pattern, score, and the wave it first appears in. Each type must be easy to tell apart at a glance and appear at a fair moment. Every enemy must be visible for at least 1.5 seconds before it can touch me, on any screen shape, including a tall narrow phone.
+
+Keep the aiming, shooting, waves, score and effects as they are.
+
+Done means: all the enemy types show up over the waves, and I can make a new enemy by copying one entry and changing its numbers, with no other code change. Test that yourself by adding one, then removing it.
+
+============================================================
+Milestone 4: upgrades
+============================================================
+
+After each wave, pause the game and offer me a choice of 3 random upgrades. I pick one, and it lasts until the run ends.
+
+Start with 8 upgrades in src/data/upgrades.ts, such as faster fire, double shot, piercing bullets, bigger bullets, a shield that blocks one hit per wave, and a slow-motion pulse. Each one must visibly change how the game plays. Upgrades can stack, with sensible limits.
+
+Show my chosen upgrades on screen during play. Restarting clears them. Make sure no pick can make the game impossible or trivially easy. Test this with a bot that plays like a person, with reaction delay and aim error, not with perfect aim, and adjust the numbers until it shows that.
+
+Keep the enemies, waves, score and effects as they are.
+
+Done means: every run feels a bit different, because of what I picked, and the choice screen works with a mouse and a finger.
+
+============================================================
+Milestone 5: bosses and arenas
+============================================================
+
+Add three arenas and a boss at the end of each one, so a full run has a real ending.
+
+- Each arena lasts 5 waves and has its own look: background and colour mood.
+- Each boss has a health bar and at least three phases that clearly change how it attacks. The player stays in the centre, so every attack must be something I can shoot down, block or react to. Every attack gets a clear warning before it lands.
+- Boss 2 and 3 must feel different from boss 1, not just tougher.
+- Beating boss 3 shows a real win screen with my score and time.
+
+Bosses and arenas go in data files. Keep the aiming, enemies and upgrades as they are.
+
+Balance the full run with bots that play like people, with reaction delay and aim error, at beginner and average skill. An average player with sensible upgrades should have a real chance of winning but not win easily, and a beginner should reach the first boss. Difficulty should rise through a boss's phases, not jump at one, and changing one number shouldn't swing the win rate wildly. Report those numbers.
+
+Done means: I can play a full run from arena 1 to the win screen, and no boss kills me without warning. Give me a test setting to start at any arena, so bosses can be checked quickly. It must only work while developing, never in the published game.
+
+============================================================
+Milestone 6: art, sound and feel
+============================================================
+
+Make this look and sound like a finished game. No new rules.
+
+- Replace the shapes with a matching set of sprites for the player, enemies, bosses and bullets, all in one designed style. Draw them in code, or use a CC0 pack I've downloaded into this folder (such as one from Kenney). Record each source in CREDITS.md.
+- Real sound effects for every action, and music that suits each arena, generated in code or from a CC0 pack I've downloaded. Use a volume setting, and start sound on the first tap.
+- Add feel using Phaser's built-in tools: particles on hits, a soft glow on bullets, a brief freeze on big hits, screen shake, and a boss death that feels huge.
+- Add a proper title screen that says the goal in one line, plus pause, settings (sound, music, EFFECTS_ON) and a credits screen.
+- Make beating a boss a real moment: bigger and longer, with a beat before it ends. Make the win screen a celebration, in the same style as the other screens.
+- Check that no sprite is clipped by its own texture, and look at real screenshots at phone and laptop size until it reads as one designed game.
+
+Everything stays readable: effects never hide an enemy, a warning or the score. They calm down when the screen is busy, and turning EFFECTS_ON off still leaves a clear game.
+
+Done means: someone seeing a screenshot wouldn't call it a prototype, and it plays as smoothly as before.
+
+============================================================
+Milestone 7: finish and publish
+============================================================
+
+Finish the game, and get it ready to share.
+
+- Save progress on this device: best score, furthest arena, settings. If saving isn't available, the game must still work.
+- Phone: holding a finger doesn't scroll or open a menu, text is readable, it handles turning the phone, and it pauses when I leave the app. Measure the frame rate at the busiest moment with the CPU slowed down 4 times, and cut effects automatically if it struggles, never warnings.
+- Check the first load is fast, and show a loading bar.
+- Build it for hosting as static files, and tell me exactly how to put it online.
+- Go through the whole game once more and list anything that still feels unfinished, most important first.
+
+Done means: I can open it from a link on my phone, play a full run, close it, and find my progress still there.
+
+============================================================
+The tester prompt
+============================================================
+
+You didn't build this, and you have no stake in it passing. Find out whether this milestone is really done. A false pass is the worst outcome.
+
+The request was:
+[paste the milestone prompt here]
+
+1. Read the rules file, and check its rules were followed.
+2. Run the tests and the build yourself. Don't take anyone's word for it.
+3. Run the real game and play it with a bot, at laptop size and at phone size with touch, using Playwright's bundled browser only. Aim at enemies, die, restart. Watch for console errors.
+4. Try to break it: rapid taps, restart many times, resize, long play.
+5. Look at screenshots yourself. Is anything clipped, unreadable, overlapping, ugly, or not what the request asked for?
+
+Don't change anything. Report PASS or FAIL, one line of evidence per item, bugs with exact steps to repeat them, and what you couldn't check. You can't hear sound or feel the game, so say so.
+
+============================================================
+The fix prompt
+============================================================
+
+An independent tester checked this. Here is its report:
+[paste the report here]
+
+Fix only what failed. Don't change anything else. Find the cause first, and tell me if you think the tester is wrong about something, and why.

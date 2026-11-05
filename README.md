@@ -32,11 +32,13 @@ Gumroad link bhi hai agar tum wahan se lena chaho (₹0+, pay what you want).
 | 18 | **Basic Song Prompt** | AI se gaana banane ka basic prompt | [PNG](guides/18-basic-song-prompt/Basic_Song_Prompt.png) | [link](https://muditjain35.gumroad.com/l/fckrf) |
 | 19 | **The Second Agent Check** | Apne AI agent ka kaam ek doosre, disconnected agent se check karwao — Builder/Tester workflow, copy-paste prompts, spiral (Day 88 reel ka guide) | [PDF](guides/19-second-agent-check/Second_Agent_Check.pdf) · [MD](guides/19-second-agent-check/Second_Agent_Check.md) | _(Gumroad link pending)_ |
 | 20 | **Solid, Scalable Software with AI Skills** | MVP ban gaya, ab solid banao: kaunsi skills (superpowers, gstack, interrogate, prompt-forge, LLM Council, Sentry, k6), kahan se, kab chalani hai. 7-stop workflow, copy-paste install, building rules, cheat sheet. English, colour edition (Day 113 reel ka guide) | [PDF](guides/20-solid-scalable-software-ai-skills/Solid_Scalable_Software_with_AI_Skills.pdf) | [link](https://muditjain35.gumroad.com/l/hbadca) |
+| 21 | **Make Your Own Game with AI** | Ek hi shooter game: pehle ChatGPT/Claude chat mein poora chhota game, phir Claude Code/Codex se bosses, upgrades, art aur music ke saath real game. Tested prompts, second-agent testing, apne idea ke liye prompt (Day 134 reel ka guide) | [PDF](guides/21-make-your-own-game-with-ai/Make_Your_Own_Game_with_AI.pdf) · [prompts (TXT)](guides/21-make-your-own-game-with-ai/prompts.txt) · [small game (HTML)](guides/21-make-your-own-game-with-ai/hold-the-middle-small.html) | — |
 
 ## Kahan se shuru karun?
 
 * Bilkul beginner ho → **16 Prompting Roadmap** → **07 AI Tool Map** → **02 50 Free AI Tools**
 * Claude Code / Codex chalana hai → **11 Coding Agents** → **04 25 Skills** → **09 AI Rule Files** → **19 Second Agent Check** → **20 Solid, Scalable Software**
+* Apna game banana hai → **21 Make Your Own Game with AI** → **19 Second Agent Check**
 * Reels banane hain → **10 Remotion** → **03 OpenMontage** → **05 AI Video Generation**
 
 ## Licence
